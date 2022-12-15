@@ -66,9 +66,10 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     #================================================================#
     # initial guess 
     #================================================================#
-    #num = 2000
-    num = 2
+    num = 2000
+    #num = 2
     cnt = 0
+    it = -1
 
     sig = sig0
     wt  = dotm0*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
@@ -81,63 +82,61 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     #=================================================================#
    
     for dotm in np.logspace(np.log10(dotm0), np.log10(dotm1), num):
+        it = it + 1
         wt = dotm*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
         #tem = wt/((ai4/ai3)*(rr/xmu)*sig)
         #tem05 = (wt/((ai4/ai3)*(rr/xmu)*sig))**0.5
 
         # iteration for newton
-        for i in range(1,20): 
+        for i in range(1,20):
+            tmp1   = tem
+            tmp2   = sig
+
             hh     = 3.0e0*(np.sqrt(wt/sig)/cc)/omk
             wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
             taues  = 0.5*kes*sig
-            #tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3**3)*(sig*sig/hh)*tem**(-3.5)
-            tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3**3)*(sig*sig/hh)*tem05**(-7.0)
+            tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3**3)*(sig*sig/hh)*tem**(-3.5)
             tau    = tauabs+0.5e0*kes*sig
             taueff = np.sqrt(tau*tauabs)
             qmd    = 1.5e0*tau+sqr3+1.0e0/tauabs
-            #qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
-            qm     = 4.0e0*aa*cc*ai3*tem05**8/qmd
+            qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
             f1     = 1.5e0*alpha*wt*omk-qm*rs/cc-(dotm/(r*r*kes))*((wt-wb)/sig)*xi
-            #f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
-            f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem05**2-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
+            f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
             dhds   =-0.5e0*hh/sig
-            #dtdt   =-3.5e0*tauabs/tem
-            dtdt   =-7e0*tauabs/tem05
+            dtdt   =-3.5e0*tauabs/tem
             dtads  = 2.5e0*tauabs/sig
             dtds   = dtads+0.5e0*kes
             dqds   =-qm*(1.5e0*dtds-dtads/(tauabs**2))/qmd
-            #dqdt   = qm*(4/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
-            dqdt   = qm*(7e0/tem05-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+            dqdt   = qm*(4/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
             dwbds  = wb*(2.0e0*ze+0.5e0)/sig
             df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds
             df1dt  =-dqdt*rs/cc
-            #df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
-            #-(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
-            df2ds  =-(ai4/ai3)*(rr/xmu)*tem05**2-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
+            df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
             -(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
-            #df2dt  =-(ai4/ai3)*(rr/xmu)*sig-(1.0e0/(4.0e0*cc))*dqdt*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3) \
-            #-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*dtdt
-            df2dt  =-2e0*(ai4/ai3)*(rr/xmu)*sig*tem05-(1.0e0/(4.0e0*cc))*dqdt*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3) \
+            df2dt  =-(ai4/ai3)*(rr/xmu)*sig-(1.0e0/(4.0e0*cc))*dqdt*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3) \
             -(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*dtdt
             dd     = df1ds*df2dt-df1dt*df2ds
             dsig   =-(f1*df2dt-f2*df1dt)/dd 
             dtem   =-(df1ds*f2-df2ds*f1)/dd
             sig    = sig+dsig
-            #tem    = tem+dtem
-            print("sig",sig,"dsig",dsig,"rat",dsig/sig,"tem",tem05,"dtem",dtem,dtem/tem)
-            tem05  = tem05+dtem
+            tem    = tem+dtem
             pgas   = (ai4/ai3)*(rr/xmu)*sig*tem
             prad   = (qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
 
-            print("sig",sig,"dsig",dsig,"rat",dsig/sig,"tem",tem05,"dtem",dtem,dtem/tem)
+            #print("sig",sig,"dsig",dsig,"rat",dsig/sig,"tem",tem05,"dtem",dtem,dtem/tem)
             # convergence check
             if (abs(dsig/sig) < 1.0e-10):
-                tem = tem05**2
                 sig_rt = np.append(sig_rt, sig)
                 tem_rt = np.append(tem_rt, tem)
                 wt_rt = np.append(wt_rt, wt)
                 cnt = cnt+1
                 break
+            #else:
+            #    if (dsig < 0.e0 or dtem <0.e0):
+            #        sig_rt = np.append(sig_rt, tmp2)
+            #        tem_rt = np.append(tem_rt, tmp1)
+            #        wt_rt  = np.append(wt_rt,  wt_rt[it-1])
+            #        break
             #else:
                 #sig = sig_rt[cnt]
                 #tem = tem_rt[cnt]
@@ -190,9 +189,9 @@ def plot_sigmd():
     #----------------------------------------------------------------#
     #alpha = 0.005
     #alpha = 0.01
-    alpha = 0.03
+    #alpha = 0.03
     #alpha = 0.05
-    #alpha = 0.10
+    alpha = 0.10
     #alpha = 0.30
     #alpha = 0.60
     #----------------------------------------------------------------#
@@ -213,8 +212,8 @@ def plot_sigmd():
     #ze  = 1.0
     #----------------------------------------------------------------#
     #\Phi_0
-    #p0 = 3e17
-    p0 = 1e17
+    p0 = 3e17
+    #p0 = 1e17
     #p0 = 3e16
     #p0 = 8e15
     #p0 = 3e15
@@ -223,33 +222,38 @@ def plot_sigmd():
     #================================================================#
 
     #RIAF
-    aa  = -3e0*np.pi*alpha*(r*rs)**2*omk*cc/rs/(xi*mded)
-    bb  = 6.2e20*ai65/(2*ai3**2)*((2*np.pi*r*rs)**2*alpha)/(xi*mded**2)*np.sqrt(xmu/(6*rr))
-    tmp1 = aa**2/(4e0*bb)
-    tmp2 = np.sqrt(bb*tmp1**3)
-    
-    dotm0 = np.sqrt(bb*(tmp1*1e-1)**3)
+    aa  = 6.2e20*ai65/(2*ai3**2)*(rr*ai4/(9*xmu*ai3))**0.5
+    bb  = 3*np.pi*rs*cc/mded*r**2*omk
+    dd  = 4*np.pi**2*aa*omk*r**2/(omk*r*r - ellin)
+    tmp1 = bb**2*alpha/(4e0*xi*dd)
+    #upper limit for RIAF (Abramowicz et al. 1995)
     dotm1 = np.sqrt(bb*tmp1**3)
-    sig0  = tmp1*1e-2
-    print(tmp1,tmp2)
+
+    sig0  = tmp1*1e-3
+    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0
+    dotm1 = np.sqrt(bb*(tmp1)**3)
+    
+    print(sig0,dotm0,tmp1,dotm1)
+    plt.scatter([sig0,tmp1],[dotm0,dotm1])
     
     dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
-    #plt.plot(sig,dotm,color="k")
-    plt.plot(sig,dotm,color="k",linestyle="dashdot")
+    plt.plot(sig,dotm,color="k")
+    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
 
     #SLE
-    dotm1 = np.sqrt(bb*tmp1**3)
+    sig0  = tmp1
+    dotm1 = np.sqrt(bb*sig0**3)
     dotm0 = 1e-3
-    sig0  = 1
-    print(tmp1,dotm0)
+    print(sig0,dotm1)
+    plt.scatter([sig0],[dotm1])
     
-    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
+    dotm,sig,wt,tem = thermal_equil_newton(dotm1, dotm0, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
-    #plt.plot(sig,dotm,color="k")
-    plt.plot(sig,dotm,color="k",linestyle="dashdot")
+    plt.plot(sig,dotm,color="k")
+    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
 
     #Standard-slim disk
     dotm0 = 1e-3
@@ -259,8 +263,8 @@ def plot_sigmd():
     dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
-    #plt.plot(sig,dotm,color="k")
-    plt.plot(sig,dotm,color="k",linestyle="dashdot")
+    plt.plot(sig,dotm,color="k")
+    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
    
     plt.loglog()
 
@@ -376,7 +380,7 @@ def plot_sigte():
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     #plt.plot(sig,dotm,color="k")
-    plt.plot(sig,tem,color="k",linestyle="dashdot")
+    plt.plot(sig,tem,color="k")
    
     plt.loglog()
 
