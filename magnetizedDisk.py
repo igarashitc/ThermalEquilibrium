@@ -134,94 +134,9 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     
     return dotm_rt,sig_rt,tem_rt,wt_rt
 
-def calc():
-    #================================================================# 
-    #Physical parameter						     #
-    #================================================================#
-    #black hole mass
-    #----------------------------------------------------------------#
-    bhm = 1.0e7
-    #bhm = 1.0e1
-    #----------------------------------------------------------------#
-    #Schwartzchild radius
-    rs  = 3.0e5*bhm
-    #----------------------------------------------------------------#
-    # Eddington luminosity/accretion rate
-    #----------------------------------------------------------------#
-    ledd = 2e0*np.pi*rs*cc**3/kes
-    mded = ledd/cc**2
-    #----------------------------------------------------------------#
-    #radius / rs
-    #----------------------------------------------------------------#
-    r   = 40.0e0
-    #r   = 50.0e0
-    #----------------------------------------------------------------#
-    #Keplerian rotation 
-    #----------------------------------------------------------------#
-    omk = np.sqrt(0.5e0/r**3)
-    #----------------------------------------------------------------#
-    #----------------------------------------------------------------#
-    #angular momentum at rin
-    #Matsumoto et al. 1984
-    #----------------------------------------------------------------#
-    ellin = 1.7e0
-    #----------------------------------------------------------------#
-    # entropy gradient parameter (e.g., Kato et al. 2008)
-    # Q^-_adv = \dot{M}/(2\pi r^2)*W/Sigma*xi
-    #----------------------------------------------------------------#
-    xi  = 1.0
-    #----------------------------------------------------------------#
-    #alpha viscousity
-    #----------------------------------------------------------------#
-    #alpha = 0.005
-    #alpha = 0.01
-    alpha = 0.03
-    #alpha = 0.05
-    #alpha = 0.10
-    #alpha = 0.30
-    #alpha = 0.60
-    #----------------------------------------------------------------#
-    # initial magnetic flux
-    # \Phi = \Phi_0 (\Sigma/\Sigma_0)^\zeta
-    # Different from Oda et al. 2009, 2012
-    #----------------------------------------------------------------#
-    #Sigma_0
-    #s0  = 1.0
-    #s0  = 60
-    #s0  = 20
-    #s0  = 10
-    s0  = 1e2
-    #----------------------------------------------------------------#
-    #\zeta
-    ze  = 0.5
-    #ze  = 0.6
-    #ze  = 1.0
-    #----------------------------------------------------------------#
-    #\Phi_0
-    p0 = 1e17
-    #p0 = 3e16
-    #p0 = 8e15
-    #p0 = 3e15
-    #================================================================#
-
-    #for RIAF
-    aa  = -1.5e0*2*np.pi*alpha*(r*rs)**2*omk*cc/rs/(xi*mded)
-    bb  = 6.2e20*ai65/(2*ai3**2)*((2*np.pi*r*rs)**2*alpha)/(xi*mded**2)*np.sqrt(xmu/(6*rr))
-    tmp1 = aa**2/(4e0*bb)
-    tmp2 = np.sqrt(bb*tmp1**3)
-    dotm0 = tmp2
-    dotm1 = dotm0*1e-2
-    sig0  = tmp1
-    
-    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
-		s0=s0, ze=ze, p0=p0)
-
-    return dotm,sig,wt,tem
-
 def plot_sigmd():
     #================================================================# 
-    #Physical parameter						     #
+    #Physical parameter						                         #
     #================================================================#
     #black hole mass
     #----------------------------------------------------------------#
@@ -288,6 +203,8 @@ def plot_sigmd():
     #p0 = 3e16
     #p0 = 8e15
     #p0 = 3e15
+    #p0 = 3e10
+    #p0 = 0e0
     #================================================================#
 
     #RIAF
@@ -403,6 +320,7 @@ def plot_sigte():
     #p0 = 3e16
     #p0 = 8e15
     #p0 = 3e15
+    #p0 = 0e0
     #================================================================#
 
     #RIAF
@@ -416,7 +334,7 @@ def plot_sigte():
     sig0  = tmp1*1e-2
     print(tmp1,tmp2)
     
-    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
+    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     #plt.plot(sig,dotm,color="k")
@@ -428,7 +346,7 @@ def plot_sigte():
     sig0  = 1
     print(tmp1,dotm0)
     
-    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
+    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     #plt.plot(sig,dotm,color="k")
@@ -439,7 +357,7 @@ def plot_sigte():
     dotm1 = 1e4
     sig0  = 1e3
     
-    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
+    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     #plt.plot(sig,dotm,color="k")
