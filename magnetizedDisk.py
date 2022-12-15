@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 #==============================================================#
 sqr3= np.sqrt(3.0e0)
 #
-#I_N = 2^NN!/(2N+1)!
+#I_N = (2^N*N!)/((2N+1)!)
 #N = 3 e.g., Oda et al. 2009
 #
 ai3 = 16.0/35.0
@@ -66,13 +66,14 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     #================================================================#
     # initial guess 
     #================================================================#
-    num = 2000
-    #num = 2
+    #num = 2000
+    num = 2
     cnt = 0
 
     sig = sig0
     wt  = dotm0*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
     tem = wt/((ai4/ai3)*(rr/xmu)*sig)
+    tem05 = tem**0.5
 
     sig_rt  = np.full(1, sig)
     tem_rt  = np.full(1, tem)
@@ -81,43 +82,57 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
    
     for dotm in np.logspace(np.log10(dotm0), np.log10(dotm1), num):
         wt = dotm*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
+        #tem = wt/((ai4/ai3)*(rr/xmu)*sig)
+        #tem05 = (wt/((ai4/ai3)*(rr/xmu)*sig))**0.5
 
         # iteration for newton
         for i in range(1,20): 
             hh     = 3.0e0*(np.sqrt(wt/sig)/cc)/omk
             wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
             taues  = 0.5*kes*sig
-            tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3**3)*(sig*sig/hh)*tem**(-3.5)
+            #tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3**3)*(sig*sig/hh)*tem**(-3.5)
+            tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3**3)*(sig*sig/hh)*tem05**(-7.0)
             tau    = tauabs+0.5e0*kes*sig
             taueff = np.sqrt(tau*tauabs)
             qmd    = 1.5e0*tau+sqr3+1.0e0/tauabs
-            qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
+            #qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
+            qm     = 4.0e0*aa*cc*ai3*tem05**8/qmd
             f1     = 1.5e0*alpha*wt*omk-qm*rs/cc-(dotm/(r*r*kes))*((wt-wb)/sig)*xi
-            f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
+            #f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
+            f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem05**2-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
             dhds   =-0.5e0*hh/sig
-            dtdt   =-3.5e0*tauabs/tem
+            #dtdt   =-3.5e0*tauabs/tem
+            dtdt   =-7e0*tauabs/tem05
             dtads  = 2.5e0*tauabs/sig
             dtds   = dtads+0.5e0*kes
             dqds   =-qm*(1.5e0*dtds-dtads/(tauabs**2))/qmd
-            dqdt   = qm*(4.0e0/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+            #dqdt   = qm*(4/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+            dqdt   = qm*(7e0/tem05-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
             dwbds  = wb*(2.0e0*ze+0.5e0)/sig
             df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds
             df1dt  =-dqdt*rs/cc
-            df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
+            #df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
+            #-(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
+            df2ds  =-(ai4/ai3)*(rr/xmu)*tem05**2-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
             -(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
-            df2dt  =-(ai4/ai3)*(rr/xmu)*sig-(1.0e0/(4.0e0*cc))*dqdt*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3) \
+            #df2dt  =-(ai4/ai3)*(rr/xmu)*sig-(1.0e0/(4.0e0*cc))*dqdt*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3) \
+            #-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*dtdt
+            df2dt  =-2e0*(ai4/ai3)*(rr/xmu)*sig*tem05-(1.0e0/(4.0e0*cc))*dqdt*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3) \
             -(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*dtdt
             dd     = df1ds*df2dt-df1dt*df2ds
             dsig   =-(f1*df2dt-f2*df1dt)/dd 
             dtem   =-(df1ds*f2-df2ds*f1)/dd
             sig    = sig+dsig
-            tem    = tem+dtem
+            #tem    = tem+dtem
+            print("sig",sig,"dsig",dsig,"rat",dsig/sig,"tem",tem05,"dtem",dtem,dtem/tem)
+            tem05  = tem05+dtem
             pgas   = (ai4/ai3)*(rr/xmu)*sig*tem
             prad   = (qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
 
-            #print(sig,dsig,dsig/sig,tem,dtem)
+            print("sig",sig,"dsig",dsig,"rat",dsig/sig,"tem",tem05,"dtem",dtem,dtem/tem)
             # convergence check
             if (abs(dsig/sig) < 1.0e-10):
+                tem = tem05**2
                 sig_rt = np.append(sig_rt, sig)
                 tem_rt = np.append(tem_rt, tem)
                 wt_rt = np.append(wt_rt, wt)
@@ -340,11 +355,11 @@ def plot_sigte():
     #plt.plot(sig,dotm,color="k")
     plt.plot(sig,tem,color="k",linestyle="dashdot")
 
-    #SLE
-    dotm1 = np.sqrt(bb*tmp1**3)
-    dotm0 = 1e-3
-    sig0  = 1
-    print(tmp1,dotm0)
+    ##SLE
+    #dotm1 = np.sqrt(bb*tmp1**3)
+    #dotm0 = 1e-3
+    #sig0  = 1
+    #print(tmp1,dotm0)
     
     dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
