@@ -189,9 +189,9 @@ def plot_sigmd():
     #----------------------------------------------------------------#
     #alpha = 0.005
     #alpha = 0.01
-    #alpha = 0.03
+    alpha = 0.03
     #alpha = 0.05
-    alpha = 0.10
+    #alpha = 0.10
     #alpha = 0.30
     #alpha = 0.60
     #----------------------------------------------------------------#
@@ -212,60 +212,114 @@ def plot_sigmd():
     #ze  = 1.0
     #----------------------------------------------------------------#
     #\Phi_0
-    p0 = 3e17
+    #p0 = 3e17
     #p0 = 1e17
-    #p0 = 3e16
+    p0 = 3e16
     #p0 = 8e15
     #p0 = 3e15
     #p0 = 3e10
     #p0 = 0e0
     #================================================================#
 
-    #RIAF
-    aa  = 6.2e20*ai65/(2*ai3**2)*(rr*ai4/(9*xmu*ai3))**0.5
-    bb  = 3*np.pi*rs*cc/mded*r**2*omk
-    dd  = 4*np.pi**2*aa*omk*r**2/(omk*r*r - ellin)
-    tmp1 = bb**2*alpha/(4e0*xi*dd)
+    #----------------------------------------------------------------#
     #upper limit for RIAF (Abramowicz et al. 1995)
+    aa  = -3e0*np.pi*alpha*(r*rs)**2*omk*cc/rs/(xi*mded)
+    bb  = 6.2e20*ai65/(2*ai3**2)*((2*np.pi*r*rs)**2*alpha) \
+            /(xi*mded**2)*np.sqrt(xmu/(6*rr))
+    tmp1  = aa**2/(4e0*bb)
     dotm1 = np.sqrt(bb*tmp1**3)
+    #----------------------------------------------------------------#
 
+    #RIAF
     sig0  = tmp1*1e-3
     dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0
-    dotm1 = np.sqrt(bb*(tmp1)**3)
-    
-    print(sig0,dotm0,tmp1,dotm1)
-    plt.scatter([sig0,tmp1],[dotm0,dotm1])
     
     dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
-    plt.plot(sig,dotm,color="k")
+    #plt.plot(sig,dotm,color="k")
     #plt.plot(sig,dotm,color="k",linestyle="dashdot")
+    #-----------------------------------------------------------------#
 
     #SLE
-    sig0  = tmp1
+    sig0  = tmp1*0.8
     dotm1 = np.sqrt(bb*sig0**3)
-    dotm0 = 1e-3
-    print(sig0,dotm1)
-    plt.scatter([sig0],[dotm1])
+    dotm0 = dotm1*1e-5
     
     dotm,sig,wt,tem = thermal_equil_newton(dotm1, dotm0, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
-    plt.plot(sig,dotm,color="k")
+    #plt.plot(sig,dotm,color="k")
     #plt.plot(sig,dotm,color="k",linestyle="dashdot")
-
-    #Standard-slim disk
-    dotm0 = 1e-3
+    
+    sig0  = sig[sig.shape[0]-1]
+    dotm0 = dotm[dotm.shape[0]-1]
     dotm1 = 1e4
-    sig0  = 1e3
+    
+    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    #plt.plot(sig,dotm,color="k")
+    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
+    #-----------------------------------------------------------------#
+
+    #Magnetized disk
+    sig0  = sig[1]
+    dotm0 = dotm[1]
+    dotm1 = dotm0*1e8
+    plt.scatter([sig0],[dotm0],color="k")
     
     dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     plt.plot(sig,dotm,color="k")
     #plt.plot(sig,dotm,color="k",linestyle="dashdot")
-   
+    #-----------------------------------------------------------------#
+    
+    #Standard-slim disk
+    sig0  = 1e4
+    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*10
+    dotm0 = 1e-2
+    #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
+    dotm1 = dotm0*1e8
+    #plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
+    
+    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    #plt.plot(sig,dotm,color="k")
+    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
+    
+    #Standard-slim disk
+    sig0  = 1e4
+    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*10
+    dotm0 = 1e-2
+    #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
+    dotm1 = dotm0*1e-4
+    #plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
+    
+    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    #plt.plot(sig,dotm,color="k")
+    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
+    
+    #Standard-slim disk
+    sig0  = sig[0]*10
+    dotm0 = dotm[0]
+    dotm1 = dotm0*1e-4
+    #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
+    dotm1 = dotm0*1e-4
+    plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
+    
+    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    plt.plot(sig,dotm,color="k")
+    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
+  
+    print(sig,dotm)
+
     plt.loglog()
 
     return 
