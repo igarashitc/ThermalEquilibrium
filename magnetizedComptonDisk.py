@@ -45,6 +45,240 @@ kb  = 1.3807e-16
 fac = 4e0*kb/(me*cc*cc)
 #================================================================#
 
+def plot(\
+    #0:dotm, 1:wt, 2:tem
+    yax = 0, \
+    #================================================================# 
+    #Physical parameter						                         #
+    #================================================================#
+    #black hole mass
+    #----------------------------------------------------------------#
+    bhm = 1.0e7, \
+    #bhm = 1.0e1, \
+    #----------------------------------------------------------------#
+    #radius / rs
+    #----------------------------------------------------------------#
+    r   = 40.0e0, \
+    #r   = 50.0e0, \
+    #----------------------------------------------------------------#
+    #angular momentum at rin
+    #Matsumoto et al. 1984
+    #----------------------------------------------------------------#
+    ellin = 1.7e0, \
+    #----------------------------------------------------------------#
+    # entropy gradient parameter (e.g., Kato et al. 2008)
+    # Q^-_adv = \dot{M}/(2\pi r^2)*W/Sigma*xi
+    #----------------------------------------------------------------#
+    xi  = 1.0, \
+    #----------------------------------------------------------------#
+    #alpha viscousity
+    #----------------------------------------------------------------#
+    #alpha = 0.005, \
+    #alpha = 0.01, \
+    alpha = 0.03, \
+    #alpha = 0.05, \
+    #alpha = 0.10, \
+    #alpha = 0.30, \
+    #alpha = 0.60, \
+    #----------------------------------------------------------------#
+    # initial magnetic flux
+    # \Phi = \Phi_0 (\Sigma/\Sigma_0)^\zeta
+    # Different from Oda et al. 2009, 2012
+    #----------------------------------------------------------------#
+    #Sigma_0
+    #s0  = 1.0, \
+    #s0  = 60, \
+    #s0  = 20, \
+    s0  = 10, \
+    #s0  = 1e2, \
+    #----------------------------------------------------------------#
+    #\zeta
+    ze  = 0.5, \
+    #ze  = 0.6, \
+    #ze  = 1.0, \
+    #----------------------------------------------------------------#
+    #\Phi_0
+    #p0 = 3e17 \
+    #p0 = 1e17 \
+    #p0 = 3e16 \
+    #p0 = 1e16 \
+    p0 = 8e15 \
+    #p0 = 1e15 \
+    #p0 = 3e10 \
+    #p0 = 0e0 \
+    #----------------------------------------------------------------#
+    ):
+    #================================================================#
+
+    #----------------------------------------------------------------#
+    #parameters
+    #----------------------------------------------------------------#
+    #Schwartzchild radius
+    rs  = 3.0e5*bhm
+    #----------------------------------------------------------------#
+    # Eddington luminosity/accretion rate
+    #----------------------------------------------------------------#
+    ledd = 2e0*np.pi*rs*cc**3/kes
+    mded = ledd/cc**2
+    #----------------------------------------------------------------#
+    #Keplerian rotation 
+    #----------------------------------------------------------------#
+    omk = np.sqrt(0.5e0/r**3)
+    #----------------------------------------------------------------#
+
+    #----------------------------------------------------------------#
+    #upper limit for RIAF (Abramowicz et al. 1995)
+    aa  = -3e0*np.pi*alpha*(r*rs)**2*omk*cc/rs/(xi*mded)
+    bb  = 6.2e20*ai65/(2*ai3**2)*((2*np.pi*r*rs)**2*alpha) \
+            /(xi*mded**2)*np.sqrt(xmu/(6*rr))
+    tmp1  = aa**2/(4e0*bb)
+    dotm1 = np.sqrt(bb*tmp1**3)
+    #----------------------------------------------------------------#
+
+    #RIAF
+    sig0  = tmp1*1e-3
+    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0
+    
+    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+
+    if (yax == 0):
+        plt.plot(sig,dotm,color="k")
+    elif (yax == 1):
+        plt.plot(sig,wt,color="k")
+    elif (yax == 2):
+        plt.plot(sig,tem,color="k")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+
+    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
+    #-----------------------------------------------------------------#
+
+    #SLE
+    sig0  = sig[sig.shape[0]-1]
+    dotm1 = np.sqrt(bb*sig0**3)
+    dotm0 = dotm1*1e-5
+    
+    dotm,sig,tem,wt = thermal_equil_newton(dotm1, dotm0, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    
+    if (yax == 0):
+        plt.plot(sig,dotm,color="k")
+    elif (yax == 1):
+        plt.plot(sig,wt,color="k")
+    elif (yax == 2):
+        plt.plot(sig,tem,color="k")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    
+    sig0  = sig[sig.shape[0]-1]
+    dotm0 = dotm[dotm.shape[0]-1]
+    dotm1 = 1e4
+    
+    dotm,sig,tem,wt = thermal_equil_newton(dotm1, dotm0, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    
+    if (yax == 0):
+        plt.plot(sig,dotm,color="k")
+    elif (yax == 1):
+        plt.plot(sig,wt,color="k")
+    elif (yax == 2):
+        plt.plot(sig,tem,color="k")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    #-----------------------------------------------------------------#
+
+    #Magnetized disk
+    #sig0  = sig[1]
+    #dotm0 = dotm[1]
+    #dotm1 = dotm0*1e8
+    #plt.scatter([sig0],[dotm0],color="k")
+    
+    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    
+    if (yax == 0):
+        plt.plot(sig,dotm,color="k")
+    elif (yax == 1):
+        plt.plot(sig,wt,color="k")
+    elif (yax == 2):
+        plt.plot(sig,tem,color="k")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    #-----------------------------------------------------------------#
+    
+    #Standard-slim disk
+    sig0  = 1e4
+    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*10
+    dotm0 = 1e-2
+    #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
+    dotm1 = dotm0*1e8
+    #plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
+    
+    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    if (yax == 0):
+        plt.plot(sig,dotm,color="k")
+    elif (yax == 1):
+        plt.plot(sig,wt,color="k")
+    elif (yax == 2):
+        plt.scatter(sig,tem,color="k")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    
+    #Standard-slim disk
+    sig0  = 1e4
+    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*10
+    dotm0 = 1e-2
+    #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
+    dotm1 = dotm0*1e-4
+    #plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
+    
+    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    
+    if (yax == 0):
+        plt.plot(sig,dotm,color="k")
+    elif (yax == 1):
+        plt.plot(sig,wt,color="k")
+    elif (yax == 2):
+        plt.plot(sig,tem,color="k")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    
+    #Standard-slim disk
+    #sig0  = sig[0]*10
+    #dotm0 = dotm[0]
+    dotm1 = dotm0*1e-4
+    #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
+    dotm1 = dotm0*1e-4
+    plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
+    
+    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    
+    if (yax == 0):
+        plt.plot(sig,dotm,color="k")
+    elif (yax == 1):
+        plt.plot(sig,wt,color="k")
+    elif (yax == 2):
+        plt.plot(sig,tem,color="k")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+  
+    #print(sig,dotm)
+
+    plt.loglog()
+
+    return 
+
 #===================================================================#
 # Calcurate thermal equilibrium solution,
 # Q^+_vis = Q^-_rad + Q^-_adv,
@@ -86,9 +320,9 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     #=================================================================#
    
     for dotm in np.logspace(np.log10(dotm0), np.log10(dotm1), num):
+        #vertically integrated total pressure
         wt = dotm*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
         #tem = wt/((ai4/ai3)*(rr/xmu)*sig)
-        #tem05 = (wt/((ai4/ai3)*(rr/xmu)*sig))**0.5
 
         # iteration for newton
         for i in range(1,20): 
@@ -104,26 +338,43 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
             tau    = tauabs+0.5e0*kes*sig
 	    #Effective optical depth
             taueff = np.sqrt(tau*tauabs)
+        #
             qmd    = 1.5e0*tau+sqr3+1.0e0/tauabs
 	    #Radiative cooling rate
             qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
+        #Radiative temperature
             ter    = (qm*rs/(aa*cc**2))**(0.25)
+        #f1
             f1     = 1.5e0*alpha*wt*omk-(dotm/(r*r*kes))*((wt-wb)/sig)*xi-qm*rs/cc*(1+sig*kes*fac*(tem - ter)) 
+        #f2
             f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
+        #dH/d\Sigma
             dhds   =-0.5e0*hh/sig
+        #d\tau/dT
             dtdt   =-3.5e0*tauabs/tem
+        #d\tau_abs/d\Sigma
             dtads  = 2.5e0*tauabs/sig
+        #d\tau/d\Sigma
             dtds   = dtads+0.5e0*kes
-            dqds   =-qm*(1.5e0*dtds-dtads/(tauabs**2))/qmd
-            dqdt   = qm*(4/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+        #dQ^-/d\Sigma
+            dqds   =-qm*(1.5e0*dtds-dtads/(tauabs**2e0))/qmd
+        #dQ^-/dT
+            dqdt   = qm*(4.e0/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+        #dW_b/d\Sigma
             dwbds  = wb*(2.0e0*ze+0.5e0)/sig
-            dtrds  = 0.25*ter/qm*dqds
-            dtrdt  = ter/qm*dqdt
+        #dT_r/d\Sigma
+            dtrds  = 0.25e0*ter/qm*dqds
+        #dT_r/dT
+            dtrdt  = 0.25e0*ter/qm*dqdt
+        #df1/d\Sigma
             df1ds  = (dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds \
                     -dqds*rs/cc*(1e0+sig*kes*fac*(tem-ter)) - qm*rs/cc*kes*fac*(tem - ter - sig*dtrds)
-            df1dt  =-dqdt*rs/cc*(1+sig*kes*fac*(tem-ter)) - qm*rs/cc*sig*kes*fac*(1e0 - dtrdt)
+        #df1/dT
+            df1dt  =-dqdt*rs/cc*(1e0+sig*kes*fac*(tem-ter)) - qm*rs/cc*sig*kes*fac*(1e0 - dtrdt)
+        #df2/d\Sigma
             df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
                     -(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
+        #df2/dT
             df2dt  =-(ai4/ai3)*(rr/xmu)*sig-(1.0e0/(4.0e0*cc))*dqdt*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3) \
             	    -(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*dtdt
             dd     = df1ds*df2dt-df1dt*df2ds
@@ -151,204 +402,3 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     dotm_rt = wt_rt/( (ell-ellin)*(cc*cc/kes)/(r*r*alpha) )
     
     return dotm_rt,sig_rt,tem_rt,wt_rt
-
-def calc():
-    #================================================================# 
-    #Physical parameter						     #
-    #================================================================#
-    #black hole mass
-    #----------------------------------------------------------------#
-    bhm = 1.0e7
-    #bhm = 1.0e1
-    #----------------------------------------------------------------#
-    #Schwartzchild radius
-    rs  = 3.0e5*bhm
-    #----------------------------------------------------------------#
-    # Eddington luminosity/accretion rate
-    #----------------------------------------------------------------#
-    ledd = 2e0*np.pi*rs*cc**3/kes
-    mded = ledd/cc**2
-    #----------------------------------------------------------------#
-    #radius / rs
-    #----------------------------------------------------------------#
-    r   = 40.0e0
-    #r   = 50.0e0
-    #----------------------------------------------------------------#
-    #Keplerian rotation 
-    #----------------------------------------------------------------#
-    omk = np.sqrt(0.5e0/r**3)
-    #----------------------------------------------------------------#
-    #----------------------------------------------------------------#
-    #angular momentum at rin
-    #Matsumoto et al. 1984
-    #----------------------------------------------------------------#
-    ellin = 1.7e0
-    #----------------------------------------------------------------#
-    # entropy gradient parameter (e.g., Kato et al. 2008)
-    # Q^-_adv = \dot{M}/(2\pi r^2)*W/Sigma*xi
-    #----------------------------------------------------------------#
-    xi  = 1.0
-    #----------------------------------------------------------------#
-    #alpha viscousity
-    #----------------------------------------------------------------#
-    #alpha = 0.005
-    #alpha = 0.01
-    alpha = 0.03
-    #alpha = 0.05
-    #alpha = 0.10
-    #alpha = 0.30
-    #alpha = 0.60
-    #----------------------------------------------------------------#
-    # initial magnetic flux
-    # \Phi = \Phi_0 (\Sigma/\Sigma_0)^\zeta
-    # Different from Oda et al. 2009, 2012
-    #----------------------------------------------------------------#
-    #Sigma_0
-    #s0  = 1.0
-    #s0  = 60
-    #s0  = 20
-    #s0  = 10
-    s0  = 1e2
-    #----------------------------------------------------------------#
-    #\zeta
-    ze  = 0.5
-    #ze  = 0.6
-    #ze  = 1.0
-    #----------------------------------------------------------------#
-    #\Phi_0
-    p0 = 1e17
-    #p0 = 3e16
-    #p0 = 8e15
-    #p0 = 3e15
-    #================================================================#
-
-    #for RIAF
-    aa  = -1.5e0*2*np.pi*alpha*(r*rs)**2*omk*cc/rs/(xi*mded)
-    bb  = 6.2e20*ai65/(2*ai3**2)*((2*np.pi*r*rs)**2*alpha)/(xi*mded**2)*np.sqrt(xmu/(6*rr))
-    tmp1 = aa**2/(4e0*bb)
-    tmp2 = np.sqrt(bb*tmp1**3)
-    dotm0 = tmp2
-    dotm1 = dotm0*1e-2
-    sig0  = tmp1
-    
-    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
-		s0=s0, ze=ze, p0=p0)
-
-    return dotm,sig,wt,tem
-
-def plot_theq():
-    #================================================================# 
-    #Physical parameter						     #
-    #================================================================#
-    #black hole mass
-    #----------------------------------------------------------------#
-    bhm = 1.0e7
-    #bhm = 1.0e1
-    #----------------------------------------------------------------#
-    #Schwartzchild radius
-    rs  = 3.0e5*bhm
-    #----------------------------------------------------------------#
-    # Eddington luminosity/accretion rate
-    #----------------------------------------------------------------#
-    ledd = 2e0*np.pi*rs*cc**3/kes
-    mded = ledd/cc**2
-    #----------------------------------------------------------------#
-    #radius / rs
-    #----------------------------------------------------------------#
-    r   = 40.0e0
-    #r   = 50.0e0
-    #----------------------------------------------------------------#
-    #Keplerian rotation 
-    #----------------------------------------------------------------#
-    omk = np.sqrt(0.5e0/r**3)
-    #----------------------------------------------------------------#
-    #----------------------------------------------------------------#
-    #angular momentum at rin
-    #Matsumoto et al. 1984
-    #----------------------------------------------------------------#
-    ellin = 1.7e0
-    #----------------------------------------------------------------#
-    # entropy gradient parameter (e.g., Kato et al. 2008)
-    # Q^-_adv = \dot{M}/(2\pi r^2)*W/Sigma*xi
-    #----------------------------------------------------------------#
-    xi  = 1.0
-    #----------------------------------------------------------------#
-    #alpha viscousity
-    #----------------------------------------------------------------#
-    #alpha = 0.005
-    #alpha = 0.01
-    alpha = 0.03
-    #alpha = 0.05
-    #alpha = 0.10
-    #alpha = 0.30
-    #alpha = 0.60
-    #----------------------------------------------------------------#
-    # initial magnetic flux
-    # \Phi = \Phi_0 (\Sigma/\Sigma_0)^\zeta
-    # Different from Oda et al. 2009, 2012
-    #----------------------------------------------------------------#
-    #Sigma_0
-    #s0  = 1.0
-    #s0  = 60
-    #s0  = 20
-    #s0  = 10
-    s0  = 1e2
-    #----------------------------------------------------------------#
-    #\zeta
-    ze  = 0.5
-    #ze  = 0.6
-    #ze  = 1.0
-    #----------------------------------------------------------------#
-    #\Phi_0
-    #p0 = 3e17
-    p0 = 1e17
-    #p0 = 3e16
-    #p0 = 8e15
-    #p0 = 3e15
-    #================================================================#
-
-    #RIAF
-    aa  = -3e0*np.pi*alpha*(r*rs)**2*omk*cc/rs/(xi*mded)
-    bb  = 6.2e20*ai65/(2*ai3**2)*((2*np.pi*r*rs)**2*alpha)/(xi*mded**2)*np.sqrt(xmu/(6*rr))
-    tmp1 = aa**2/(4e0*bb)
-    tmp2 = np.sqrt(bb*tmp1**3)
-    
-    dotm0 = np.sqrt(bb*(tmp1*1e-1)**3)
-    dotm1 = np.sqrt(bb*tmp1**3)
-    sig0  = tmp1*1e-2
-    print(tmp1,tmp2)
-    
-    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
-		s0=s0, ze=ze, p0=p0)
-    plt.plot(sig,dotm,color="k")
-    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
-
-    #SLE
-    dotm1 = np.sqrt(bb*tmp1**3)
-    dotm0 = 1e-3
-    sig0  = 1
-    print(tmp1,dotm0)
-    
-    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
-		s0=s0, ze=ze, p0=p0)
-    plt.plot(sig,dotm,color="k")
-    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
-
-    #Standard-slim disk
-    dotm0 = 1e-3
-    dotm1 = 1e4
-    sig0  = 1e3
-    
-    dotm,sig,wt,tem = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
-		s0=s0, ze=ze, p0=p0)
-    #plt.plot(sig,dotm,color="k")
-    plt.plot(sig,tem,color="k")
-    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
-   
-    plt.loglog()
-
-    return 
