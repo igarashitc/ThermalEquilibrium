@@ -23,6 +23,7 @@ sqr3= np.sqrt(3.0e0)
 ai3 = 16.0/35.0
 ai4 = 128.0/315.0
 ai65= 0.33   # not exact
+ai7 = 2048.0/6435.0
 #
 #gas constant
 rr  = 8.3145e7
@@ -93,6 +94,7 @@ def plot(\
     #\Phi_0
     #p0 = 3e17 \
     #p0 = 1e17 \
+    #p0 = 8e16 \
     #p0 = 3e16 \
     #p0 = 1e16 \
     p0 = 8e15 \
@@ -132,16 +134,16 @@ def plot(\
     sig0  = tmp1*1e-3
     dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0
     
-    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
+    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
 
     if (yax == 0):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,dotm,color="k")
     elif (yax == 1):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,bt,color="k")
     elif (yax == 2):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,tem,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
 
@@ -149,20 +151,20 @@ def plot(\
     #-----------------------------------------------------------------#
 
     #SLE
-    sig0  = tmp1*0.8
+    sig0  = tmp1*0.7
     dotm1 = np.sqrt(bb*sig0**3)
     dotm0 = dotm1*1e-5
     
-    dotm,sig,tem,wt = thermal_equil_newton(dotm1, dotm0, sig0,\
+    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm1, dotm0, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     
     if (yax == 0):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,dotm,color="k")
     elif (yax == 1):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,bt,color="k")
     elif (yax == 2):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,tem,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
     
@@ -170,16 +172,16 @@ def plot(\
     dotm0 = dotm[dotm.shape[0]-1]
     dotm1 = 1e4
     
-    dotm,sig,tem,wt = thermal_equil_newton(dotm1, dotm0, sig0,\
+    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm1, dotm0, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     
     if (yax == 0):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,dotm,color="k")
     elif (yax == 1):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,bt,color="k")
     elif (yax == 2):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,tem,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
     #-----------------------------------------------------------------#
@@ -188,18 +190,18 @@ def plot(\
     #sig0  = sig[1]
     #dotm0 = dotm[1]
     #dotm1 = dotm0*1e8
-    #plt.scatter([sig0],[dotm0],color="k")
+    plt.scatter([sig0],[dotm0],color="k")
     
-    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
+    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     
     if (yax == 0):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,dotm,color="k")
     elif (yax == 1):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,bt,color="k")
     elif (yax == 2):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,tem,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
     #-----------------------------------------------------------------#
@@ -212,15 +214,15 @@ def plot(\
     dotm1 = dotm0*1e8
     #plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
     
-    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
+    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     if (yax == 0):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,dotm,color="k")
     elif (yax == 1):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,bt,color="k")
     elif (yax == 2):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,tem,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
     
@@ -232,37 +234,37 @@ def plot(\
     dotm1 = dotm0*1e-4
     #plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
     
-    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
+    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     
     if (yax == 0):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,dotm,color="k")
     elif (yax == 1):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,bt,color="k")
     elif (yax == 2):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,tem,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
     
     #Standard-slim disk
     #sig0  = sig[0]*10
     #dotm0 = dotm[0]
-    dotm1 = dotm0*1e-4
+    #dotm1 = dotm0*1e-4
     #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
     dotm1 = dotm0*1e-4
     plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
     
-    dotm,sig,tem,wt = thermal_equil_newton(dotm0, dotm1, sig0,\
+    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     
     if (yax == 0):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,dotm,color="k")
     elif (yax == 1):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,bt,color="k")
     elif (yax == 2):
-        plt.plot(sig,wt,color="k")
+        plt.plot(sig,tem,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
   
@@ -308,12 +310,13 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     sig = sig0
     wt  = dotm0*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
     tem = wt/((ai4/ai3)*(rr/xmu)*sig)
-    tem05 = tem**0.5
-    print((ell-ellin)*(cc*cc/kes)/(r*r*alpha))
+    #tem05 = tem**0.5
+    print("te",ell,ellin,(ell-ellin)*(cc*cc/kes)/(r*r*alpha))
 
     sig_rt  = np.full(1, sig)
     tem_rt  = np.full(1, tem)
     wt_rt   = np.full(1, wt )
+    bt_rt   = np.full(1, wt )
     #=================================================================#
    
     for dotm in np.logspace(np.log10(dotm0), np.log10(dotm1), num):
@@ -364,6 +367,9 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
                 sig_rt = np.append(sig_rt, sig)
                 tem_rt = np.append(tem_rt, tem)
                 wt_rt = np.append(wt_rt, wt)
+
+                wb  = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
+                bt_rt = np.append(bt_rt, wt/wb - 1e0)
                 cnt = cnt+1
                 break
             #else:
@@ -379,7 +385,8 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     sig_rt = np.delete(sig_rt, 0)
     tem_rt = np.delete(tem_rt, 0)
     wt_rt  = np.delete(wt_rt,  0)
+    bt_rt  = np.delete(bt_rt,  0)
     dotm_rt = wt_rt/( (ell-ellin)*(cc*cc/kes)/(r*r*alpha) )
     
-    return dotm_rt,sig_rt,tem_rt,wt_rt
+    return dotm_rt,sig_rt,tem_rt,wt_rt,bt_rt
 
