@@ -22,8 +22,8 @@ sqr3= np.sqrt(3.0e0)
 #
 ai3 = 16.0/35.0
 ai4 = 128.0/315.0
-ai65= 0.33   # not exact
 ai7 = 2048.0/6435.0
+ai65= 0.33   # not exact
 #
 #gas constant
 rr  = 8.3145e7
