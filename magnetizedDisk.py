@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 #==============================================================#
 sqr3= np.sqrt(3.0e0)
 #
-#I_N = (2^N*N!)/((2N+1)!)
+#I_N = (2^N*N!)^2/((2N+1)!)
 #N = 3 e.g., Oda et al. 2009
 #
 ai3 = 16.0/35.0
@@ -130,146 +130,153 @@ def plot(\
     dotm1 = np.sqrt(bb*tmp1**3)
     #----------------------------------------------------------------#
 
+    #----------------------------------------------------------------#
     #RIAF
-    sig0  = tmp1*1e-3
-    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0
+    sig0  = tmp1*1e-4
+    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*2
+    #plt.scatter(sig0,dotm0)
     
     dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
 
+    print(sig.shape,"riaf")
     if (yax == 0):
         plt.plot(sig,dotm,color="k")
     elif (yax == 1):
-        plt.plot(sig,bt,color="k")
+        plt.plot(sig,wt,color="k")
     elif (yax == 2):
         plt.plot(sig,tem,color="k")
+    elif (yax == 3):
+        plt.plot(sig,bt,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
-
-    #plt.plot(sig,dotm,color="k",linestyle="dashdot")
     #-----------------------------------------------------------------#
 
+    #----------------------------------------------------------------#
     #SLE
-    sig0  = tmp1*0.7
-    dotm1 = np.sqrt(bb*sig0**3)
-    dotm0 = dotm1*1e-5
-    
-    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm1, dotm0, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
-		s0=s0, ze=ze, p0=p0)
-    
-    if (yax == 0):
-        plt.plot(sig,dotm,color="k")
-    elif (yax == 1):
-        plt.plot(sig,bt,color="k")
-    elif (yax == 2):
-        plt.plot(sig,tem,color="k")
-    else:
-        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
-    
     sig0  = sig[sig.shape[0]-1]
     dotm0 = dotm[dotm.shape[0]-1]
-    dotm1 = 1e4
+    dotm1 = dotm0*2
     
-    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm1, dotm0, sig0,\
+    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     
+    print(sig.shape,"sle1")
     if (yax == 0):
         plt.plot(sig,dotm,color="k")
     elif (yax == 1):
-        plt.plot(sig,bt,color="k")
+        plt.plot(sig,wt,color="k")
     elif (yax == 2):
         plt.plot(sig,tem,color="k")
+    elif (yax == 3):
+        plt.plot(sig,bt,color="k")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    
+    sig0  = tmp1*0.1
+    dotm0 = np.sqrt(bb*sig0**3)
+    sig0  = sig[sig.shape[0]-1]*2
+    dotm0 = dotm[dotm.shape[0]-1]
+    dotm1 = dotm1*1e-8
+    #plt.scatter(sig0,dotm0,color="k")
+    
+    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    
+    print(sig.shape,"sle2")
+    if (yax == 0):
+        plt.plot(sig,dotm,color="k")
+    elif (yax == 1):
+        plt.plot(sig,wt,color="k")
+    elif (yax == 2):
+        plt.plot(sig,tem,color="k")
+    elif (yax == 3):
+        plt.plot(sig,bt,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
     #-----------------------------------------------------------------#
 
+    #----------------------------------------------------------------#
     #Magnetized disk
-    #sig0  = sig[1]
-    #dotm0 = dotm[1]
-    #dotm1 = dotm0*1e8
-    plt.scatter([sig0],[dotm0],color="k")
+    sig0  = sig[sig.shape[0]-1]*1.4
+    dotm0 = dotm[dotm.shape[0]-1]*1
+    #sig0  = 10
+    #dotm0 = 0.01
+    dotm1 = dotm0*1e12
+    plt.scatter(sig0,dotm0,color="k")
     
     dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
 		s0=s0, ze=ze, p0=p0)
     
+    print(sig.shape,"md")
     if (yax == 0):
-        plt.plot(sig,dotm,color="k")
+        plt.plot(sig,dotm,color="blue")
     elif (yax == 1):
-        plt.plot(sig,bt,color="k")
+        plt.plot(sig,wt,color="k")
     elif (yax == 2):
         plt.plot(sig,tem,color="k")
+    elif (yax == 3):
+        plt.plot(sig,bt,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    
+    #-----------------------------------------------------------------#
+    #Standard-slim disk
+    sig0  = 1e4
+    sig0  = 1e3
+    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*10
+    dotm0 = 1e-3
+    #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
+    sig0  = sig[sig.shape[0]-1]
+    dotm0 = dotm[dotm.shape[0]-1]
+    dotm1 = dotm0*1e8
+    plt.scatter(sig0,dotm0)
+    
+    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+		s0=s0, ze=ze, p0=p0)
+    
+    print(sig.shape,"sad")
+    if (yax == 0):
+        plt.plot(sig,dotm,"ro-",color="green")
+    elif (yax == 1):
+        plt.plot(sig,wt,color="k")
+    elif (yax == 2):
+        plt.plot(sig,tem,color="k")
+    elif (yax == 3):
+        plt.plot(sig,bt,color="k")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    
+    #-----------------------------------------------------------------#
+    #Slim disk
+    #sig0  = sig[0]
+    #dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0
+    ##dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
+    #dotm1 = dotm0*1e-8
+    #plt.scatter(sig0,dotm0)
+    #
+    #dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
+    #    bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+	#	s0=s0, ze=ze, p0=p0)
+    #
+    #print(sig.shape,"slim")
+    #if (yax == 0):
+    #    plt.plot(sig,dotm,color="k")
+    #elif (yax == 1):
+    #    plt.plot(sig,wt,color="k")
+    #elif (yax == 2):
+    #    plt.plot(sig,tem,color="k")
+    #elif (yax == 3):
+    #    plt.plot(sig,bt,color="k")
+    #else:
+    #    print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
     #-----------------------------------------------------------------#
     
-    #Standard-slim disk
-    sig0  = 1e4
-    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*10
-    dotm0 = 1e-2
-    #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
-    dotm1 = dotm0*1e8
-    #plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
-    
-    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
-		s0=s0, ze=ze, p0=p0)
-    if (yax == 0):
-        plt.plot(sig,dotm,color="k")
-    elif (yax == 1):
-        plt.plot(sig,bt,color="k")
-    elif (yax == 2):
-        plt.plot(sig,tem,color="k")
-    else:
-        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
-    
-    #Standard-slim disk
-    sig0  = 1e4
-    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*10
-    dotm0 = 1e-2
-    #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
-    dotm1 = dotm0*1e-4
-    #plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
-    
-    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
-		s0=s0, ze=ze, p0=p0)
-    
-    if (yax == 0):
-        plt.plot(sig,dotm,color="k")
-    elif (yax == 1):
-        plt.plot(sig,bt,color="k")
-    elif (yax == 2):
-        plt.plot(sig,tem,color="k")
-    else:
-        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
-    
-    #Standard-slim disk
-    #sig0  = sig[0]*10
-    #dotm0 = dotm[0]
-    #dotm1 = dotm0*1e-4
-    #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
-    dotm1 = dotm0*1e-4
-    plt.scatter([sig0,sig0*1e-4],[dotm0,dotm1])
-    
-    dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
-		s0=s0, ze=ze, p0=p0)
-    
-    if (yax == 0):
-        plt.plot(sig,dotm,color="k")
-    elif (yax == 1):
-        plt.plot(sig,bt,color="k")
-    elif (yax == 2):
-        plt.plot(sig,tem,color="k")
-    else:
-        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
-  
-    #print(sig,dotm)
-
     plt.loglog()
 
     return 
@@ -309,9 +316,8 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
 
     sig = sig0
     wt  = dotm0*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
-    tem = wt/((ai4/ai3)*(rr/xmu)*sig)
-    #tem05 = tem**0.5
-    print("te",ell,ellin,(ell-ellin)*(cc*cc/kes)/(r*r*alpha))
+    tem = wt/((ai4/ai3)*(rr/xmu)*sig) 
+    #print("te",ell,ellin,(ell-ellin)*(cc*cc/kes)/(r*r*alpha))
 
     sig_rt  = np.full(1, sig)
     tem_rt  = np.full(1, tem)
@@ -321,36 +327,62 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
    
     for dotm in np.logspace(np.log10(dotm0), np.log10(dotm1), num):
         it = it + 1
+        #vertically integrated total pressure
         wt = dotm*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
         #tem = wt/((ai4/ai3)*(rr/xmu)*sig)
-        #tem05 = (wt/((ai4/ai3)*(rr/xmu)*sig))**0.5
 
         # iteration for newton
         for i in range(1,20):
             tmp1   = tem
             tmp2   = sig
 
+        #Disk half thickness
             hh     = 3.0e0*(np.sqrt(wt/sig)/cc)/omk
-            wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
+        #Electron scattering optical depth
             taues  = 0.5*kes*sig
-            tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3**3)*(sig*sig/hh)*tem**(-3.5)
+        #Absorption optical depth
+            tauabs = (6.2e20/(2.0e0*aa*cc*rs))*(ai65/(ai3*ai7))*(sig*sig/hh)*tem**(-3.5)
+        #Total optical depth
             tau    = tauabs+0.5e0*kes*sig
-            taueff = np.sqrt(tau*tauabs)
+        #Effective optical depth
+            #taueff = np.sqrt(tau*tauabs)
+        #Denominator of radiative cooling rate
             qmd    = 1.5e0*tau+sqr3+1.0e0/tauabs
+        #Radiative cooling rate
             qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
+        #Vertically integrated gas pressure
+            wg    = (ai4/ai3)*(rr/xmu)*sig*tem 
+        #Vertically integrated radiation pressure
+            wr    = (qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
+        #Vertically integrated magnetic pressure
+            wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
+        #f1
             f1     = 1.5e0*alpha*wt*omk-qm*rs/cc-(dotm/(r*r*kes))*((wt-wb)/sig)*xi
+            #f1     = 1.5e0*alpha*wt*omk-qm*rs/cc-(dotm/(r*r*kes))*((wg+wr)/sig)*xi
+        #f2
             f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
+        #dH/d\Sigma
             dhds   =-0.5e0*hh/sig
-            dtdt   =-3.5e0*tauabs/tem
+        #d\tau/dT
+            dtdt   = -3.5e0*tauabs/tem
+        #d\tau_abs/d\Sigma
             dtads  = 2.5e0*tauabs/sig
+        #d\tau/d\Sigma
             dtds   = dtads+0.5e0*kes
+        #dQ^-/d\Sigma
             dqds   =-qm*(1.5e0*dtds-dtads/(tauabs**2))/qmd
+        #dQ^-/dT
             dqdt   = qm*(4/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+        #dW_b/d\Sigma
             dwbds  = wb*(2.0e0*ze+0.5e0)/sig
+        #df1/d\Sigma
             df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds
+        #df1/dT
             df1dt  =-dqdt*rs/cc
+        #df2/d\Sigma
             df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
             -(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
+        #df2/dT
             df2dt  =-(ai4/ai3)*(rr/xmu)*sig-(1.0e0/(4.0e0*cc))*dqdt*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3) \
             -(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*dtdt
             dd     = df1ds*df2dt-df1dt*df2ds
@@ -372,12 +404,6 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
                 bt_rt = np.append(bt_rt, wt/wb - 1e0)
                 cnt = cnt+1
                 break
-            #else:
-            #    if (dsig < 0.e0 or dtem <0.e0):
-            #        sig_rt = np.append(sig_rt, tmp2)
-            #        tem_rt = np.append(tem_rt, tmp1)
-            #        wt_rt  = np.append(wt_rt,  wt_rt[it-1])
-            #        break
             #else:
                 #sig = sig_rt[cnt]
                 #tem = tem_rt[cnt]
