@@ -325,6 +325,7 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     sig_rt  = np.full(1, sig)
     tem_rt  = np.full(1, tem)
     wt_rt   = np.full(1, wt )
+    bt_rt   = np.full(1, wt )
     #=================================================================#
    
     for dotm in np.logspace(np.log10(dotm0), np.log10(dotm1), num):
@@ -348,16 +349,18 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
             qmd    = 1.5e0*tau+sqr3+1.0e0/tauabs
 	    #Radiative cooling rate
             qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
+        #Radiative temperature
+            ter    = (qm*rs/(aa*cc**2))**(0.25)
+        #Compton cooling rate
+            qc     = fac*qm*kes*sig*(ai4/ai3*(min([tem,1e9] - ter)))
         #Vertically integrated gas pressure
             wg     = (ai4/ai3)*(rr/xmu)*sig*tem
         #Vertically integrated radiation pressure
             wr     = (qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
  	    #Vertically integrated magnetic pressure
             wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
-        #Radiative temperature
-            ter    = (qm*rs/(aa*cc**2))**(0.25)
         #f1
-            f1     = 1.5e0*alpha*wt*omk-(dotm/(r*r*kes))*((wt-wb)/sig)*xi-qm*rs/cc*(1+sig*kes*fac*(tem - ter)) 
+            f1     = 1.5e0*alpha*wt*omk-qm*rs/cc-qc-(dotm/(r*r*kes))*((wt-wb)/sig)*xi
         #f2
             f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
         #dH/d\Sigma
@@ -379,10 +382,11 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         #dT_r/dT
             dtrdt  = 0.25e0*ter/qm*dqdt
         #df1/d\Sigma
-            df1ds  = (dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds \
-                    -dqds*rs/cc*(1e0+sig*kes*fac*(tem-ter)) - qm*rs/cc*kes*fac*(tem - ter - sig*dtrds)
+            df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds \
+                    -fac*((kes*sig*dqds + kes*qm)*(ai4/ai3*min([tem,1e9]) - ter) - kes*sig*qm*dtrds)
         #df1/dT
-            df1dt  =-dqdt*rs/cc*(1e0+sig*kes*fac*(tem-ter)) - qm*rs/cc*sig*kes*fac*(1e0 - dtrdt)
+            df1dt  =-dqdt*rs/cc \
+                    -fac*kes*sig*(dqdt*(ai4/ai3*min([tem,1e9]) - ter) + qm*(ai4/ai3 - dtrdt))
         #df2/d\Sigma
             df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
                     -(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
@@ -402,6 +406,9 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
                 sig_rt = np.append(sig_rt, sig)
                 tem_rt = np.append(tem_rt, tem)
                 wt_rt = np.append(wt_rt, wt)
+
+                wb    = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
+                bt_rt = np.append(bt_rt, wt/wb - 1.e0)
                 cnt = cnt+1
                 break
             #else:
@@ -413,4 +420,4 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     wt_rt  = np.delete(wt_rt,  0)
     dotm_rt = wt_rt/( (ell-ellin)*(cc*cc/kes)/(r*r*alpha) )
     
-    return dotm_rt,sig_rt,tem_rt,wt_rt
+    return dotm_rt,sig_rt,tem_rt,wt_rt,bt_rt
