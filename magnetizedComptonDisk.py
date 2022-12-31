@@ -157,10 +157,7 @@ def plot(\
         plt.plot(sig,bt,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
-    #-----------------------------------------------------------------#
-
-    #----------------------------------------------------------------#
-    #SLE
+    
     sig0  = sig[sig.shape[0]-1]
     dotm0 = dotm[dotm.shape[0]-1]
     dotm1 = dotm0*2
@@ -180,11 +177,14 @@ def plot(\
         plt.plot(sig,bt,color="k")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
-    
+    #-----------------------------------------------------------------#
+
+    #----------------------------------------------------------------#
+    #SLE 
     sig0  = tmp1*0.1
     dotm0 = np.sqrt(bb*sig0**3)
     sig0  = sig[sig.shape[0]-1]*2
-    dotm0 = dotm[dotm.shape[0]-1]
+    dotm0 = dotm[dotm.shape[0]-1]*0.8
     dotm1 = dotm1*1e-8
     #plt.scatter(sig0,dotm0,color="k")
     
@@ -202,7 +202,7 @@ def plot(\
     elif (yax == 3):
         plt.plot(sig,bt,color="k")
     else:
-        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature") 
     #-----------------------------------------------------------------#
 
     #----------------------------------------------------------------#
@@ -212,7 +212,7 @@ def plot(\
     #sig0  = 10
     #dotm0 = 0.01
     dotm1 = dotm0*1e12
-    plt.scatter(sig0,dotm0,color="k")
+    #plt.scatter(sig0,dotm0,color="k")
     
     dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
@@ -220,7 +220,7 @@ def plot(\
     
     print(sig.shape,"md")
     if (yax == 0):
-        plt.plot(sig,dotm,color="blue")
+        plt.plot(sig,dotm,color="k")
     elif (yax == 1):
         plt.plot(sig,wt,color="k")
     elif (yax == 2):
@@ -240,7 +240,7 @@ def plot(\
     sig0  = sig[sig.shape[0]-1]
     dotm0 = dotm[dotm.shape[0]-1]
     dotm1 = dotm0*1e8
-    plt.scatter(sig0,dotm0)
+    #plt.scatter(sig0,dotm0)
     
     dotm,sig,tem,wt,bt = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
@@ -248,7 +248,7 @@ def plot(\
     
     print(sig.shape,"sad")
     if (yax == 0):
-        plt.plot(sig,dotm,"ro-",color="green")
+        plt.plot(sig,dotm,color="k")
     elif (yax == 1):
         plt.plot(sig,wt,color="k")
     elif (yax == 2):
@@ -331,7 +331,6 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     for dotm in np.logspace(np.log10(dotm0), np.log10(dotm1), num):
         #vertically integrated total pressure
         wt = dotm*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
-        #tem = wt/((ai4/ai3)*(rr/xmu)*sig)
 
         # iteration for newton
         for i in range(1,20): 
@@ -350,9 +349,9 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
 	    #Radiative cooling rate
             qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
         #Radiative temperature
-            ter    = (qm*rs/(aa*cc**2))**(0.25)
+            ter    = (qm/(aa*cc))**(0.25)
         #Compton cooling rate
-            qc     = fac*qm*kes*sig*(ai4/ai3*(min([tem,1e9] - ter)))
+            qc     = fac*qm*kes*sig*(ai4/ai3*(tem - ter))
         #Vertically integrated gas pressure
             wg     = (ai4/ai3)*(rr/xmu)*sig*tem
         #Vertically integrated radiation pressure
@@ -383,10 +382,10 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
             dtrdt  = 0.25e0*ter/qm*dqdt
         #df1/d\Sigma
             df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds \
-                    -fac*((kes*sig*dqds + kes*qm)*(ai4/ai3*min([tem,1e9]) - ter) - kes*sig*qm*dtrds)
+                    -fac*((kes*sig*dqds + kes*qm)*(ai4/ai3*tem - ter) - kes*sig*qm*dtrds)
         #df1/dT
             df1dt  =-dqdt*rs/cc \
-                    -fac*kes*sig*(dqdt*(ai4/ai3*min([tem,1e9]) - ter) + qm*(ai4/ai3 - dtrdt))
+                    -fac*kes*sig*(dqdt*(ai4/ai3*tem - ter) + qm*(ai4/ai3 - dtrdt))
         #df2/d\Sigma
             df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
                     -(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
