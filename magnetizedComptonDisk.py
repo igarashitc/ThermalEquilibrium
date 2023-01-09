@@ -323,8 +323,8 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
 	    #Electron scattering optical depth
             taues  = 0.5*kes*sig
 	    #Absorption optical depth
-            #tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3*ai7)*(sig*sig/hh)*tem**(-3.5)
-            tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3*ai7)*(sig*sig/hh)*teme**(-3.5)
+            tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3*ai7)*(sig*sig/hh)*tem**(-3.5)
+            #tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3*ai7)*(sig*sig/hh)*teme**(-3.5)
 	    #Total optical depth
             tau    = tauabs+0.5e0*kes*sig
 	    #Effective optical depth
@@ -332,13 +332,13 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         #Denominator of radiative cooling rate
             qmd    = 1.5e0*tau+sqr3+1.0e0/tauabs
 	    #Radiative cooling rate
-            #qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
-            qm     = 4.0e0*aa*cc*ai3*teme**4/qmd
+            qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
+            #qm     = 4.0e0*aa*cc*ai3*teme**4/qmd
         #Radiative temperature
             ter    = (qm/(aa*cc))**(0.25)
         #Compton cooling rate
-            #qc     = fac*qm*kes*sig*(ai4/ai3*(tem - ter))
-            qc     = fac*qm*rs/cc*kes*sig*(ai4/ai3*(teme - ter))
+            qc     = fac*qm*kes*sig*(ai4/ai3*(tem - ter))
+            #qc     = fac*qm*kes*sig*(ai4/ai3*(teme - ter))
         #Vertically integrated gas pressure
             wg     = (ai4/ai3)*(rr/xmu)*sig*tem
         #Vertically integrated radiation pressure
@@ -346,14 +346,14 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
  	    #Vertically integrated magnetic pressure
             wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
         #f1=Q^+ - Q^-_rad - Q^-_adv
-            f1     = 1.5e0*alpha*wt*omk-qm*rs/cc-qc-(dotm/(r*r*kes))*((wt-wb)/sig)*xi
+            f1     = 1.5e0*alpha*wt*omk-qm*rs/cc-qc*rs/cc-(dotm/(r*r*kes))*((wt-wb)/sig)*xi
         #f2=W_tot - W_mag - W_gas - W_rad
             f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
         #dH/d\Sigma
             dhds   =-0.5e0*hh/sig
         #d\tau/dT
-            #dtdt   =-3.5e0*tauabs/tem
-            dtdt   =-3.5e0*tauabs/teme
+            dtdt   =-3.5e0*tauabs/tem
+            #dtdt   =-3.5e0*tauabs/teme
         #d\tau_abs/d\Sigma
             dtads  = 2.5e0*tauabs/sig
         #d\tau/d\Sigma
@@ -370,15 +370,15 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         #dT_r/dT
             dtrdt  = 0.25e0*ter/qm*dqdt
         #df1/d\Sigma
-            #df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds \
-            #        -fac*((kes*sig*dqds + kes*qm)*(ai4/ai3*tem - ter) - kes*sig*qm*dtrds)
             df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds \
-                    -fac*((kes*sig*dqds + kes*qm)*(ai4/ai3*teme - ter) - kes*sig*qm*dtrds)
+                    -fac*((kes*sig*dqds + kes*qm)*(ai4/ai3*tem - ter) - kes*sig*qm*dtrds)*rs/cc
+            #df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds \
+            #        -fac*((kes*sig*dqds + kes*qm)*(ai4/ai3*teme - ter) - kes*sig*qm*dtrds)*rs/cc
         #df1/dT
-            #df1dt  =-dqdt*rs/cc \
-            #        -fac*kes*sig*(dqdt*(ai4/ai3*tem - ter) + qm*(ai4/ai3 - dtrdt))
             df1dt  =-dqdt*rs/cc \
-                    -fac*kes*sig*(dqdt*(ai4/ai3*teme - ter) + qm*(ai4/ai3 - dtrdt))
+                    -fac*kes*sig*(dqdt*(ai4/ai3*tem - ter) + qm*(ai4/ai3 - dtrdt))*rs/cc
+            #df1dt  =-dqdt*rs/cc \
+            #        -fac*kes*sig*(dqdt*(ai4/ai3*teme - ter) + qm*(ai4/ai3 - dtrdt))*rs/cc
         #df2/d\Sigma
             df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
                     -(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
