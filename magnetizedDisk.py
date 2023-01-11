@@ -245,6 +245,18 @@ def plot_fork(sig, dotm, wt, tem, bt, qm, qa, qv, yax=0, clr="k"):
         plt.plot(sig,qv,color=clr)
         plt.plot(sig,qv-qm-qa,color=clr)
         plt.xscale("log")
+    elif (yax == 5):
+        r   = 40
+        rs  = 3e5*1e7
+        omk = np.sqrt(0.5e0/r**3)
+        hh  = 3e0*(np.sqrt(wt/sig)/cc)/omk
+        tauabs = (6.2e20/(2.0e0*aa*cc*rs))*(ai65/(ai3*ai7))*(sig*sig/hh)*tem**(-3.5)
+        tau = 0.5e0*kes*sig+tauabs
+        tr1 = (2e0*ai3**2e0*hh*qm/(6.2e20*ai65*sig**2e0))**2e0
+        tr2 = (1.5e0*tau*qm/(4e0*aa*cc*ai3))**0.25e0
+        plt.plot(sig,tr1,color="red")
+        plt.plot(sig,tr2,color=clr)
+        plt.plot(sig,tem,linestyle="dashed")
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
 

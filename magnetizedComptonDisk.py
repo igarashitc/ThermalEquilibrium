@@ -155,7 +155,7 @@ def plot(\
     if (sig.shape[0] != 0):
         sig0  = sig[sig.shape[0]-1]
         dotm0 = dotm[dotm.shape[0]-1]
-    dotm1 = dotm0*2
+    dotm1 = dotm0*10
     
     dotm,sig,tem,wt,bt,qm,qc,qa,qv = thermal_equil_newton(dotm0, dotm1, sig0,\
         bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
@@ -168,8 +168,8 @@ def plot(\
     #----------------------------------------------------------------#
     #SLE 
     if (sig.shape[0] != 0):
-        sig0  = sig[sig.shape[0]-1]*2
-        dotm0 = dotm[dotm.shape[0]-1]
+        sig0  = sig[sig.shape[0]-1]*1.2
+        dotm0 = dotm[dotm.shape[0]-1]*0.8
     dotm1 = dotm0*1e-14
     #plt.scatter(sig0,dotm0,color="k")
     
@@ -319,7 +319,7 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         # iteration for newton
         for i in range(1,20): 
         #Electron temperature
-            teme   = min(tem, 1e9)
+            teme   = min(tem, 1e10)
             teme   = tem
 	    #Disk height
             hh     = 3.0e0*(np.sqrt(wt/sig)/cc)/omk
@@ -336,7 +336,8 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
 	    #Radiative cooling rate
             qm     = 4.0e0*aa*cc*ai3*teme**4/qmd
         #Radiative temperature
-            ter    = (qm/(aa*cc))**(0.25)
+            #ter    = (qm/(aa*cc))**(0.25)
+            ter    = (1.5e0*tau/(4e0*aa*cc*ai3)*qm)**0.25e0
         #Compton cooling rate
             qc     = fac*qm*kes*sig*(ai4/ai3*(teme - ter))
             #qc   = 0
@@ -373,7 +374,8 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         #dQ^-_adv/d\Sigma
             dqads  =-(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi-(dotm/(r*r*kes*sig))*xi*dwbds
         #dT_r/d\Sigma
-            dtrds  = 0.25e0*ter/qm*dqds
+            #dtrds  = 0.25e0*ter/qm*dqds
+            dtrds  = (ter/(4e0*tau*qm))*(qm*dtds+tau*dqds)
         #dQ^_Comp/d\Sigma
             dqcds  = fac*((kes*sig*dqds+kes*qm)*(ai4/ai3*teme-ter)-kes*sig*qm*dtrds)
             #dqcds  = 0
@@ -395,9 +397,13 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         #dWb/dT
             dwbdt  = 0e0
         #dT_r/dT
-            dtrdt  = 0.25e0*ter/qm*dqdt
+            #dtrdt  = 0.25e0*ter/qm*dqdt
+            dtrdt  = (ter/(4e0*tau*qm))*(qm*dtdt+tau*dqdt)
+        #dT_e/dT
+            #dtedt  = min(tem-1e9,0)/(tem-1e9)
+            dtedt  = 1e0
         #dQ^-_Comp/dT
-            dqcdt  = fac*kes*sig*(dqdt*(ai4/ai3*teme-ter)+qm*(ai4/ai3-dtrdt))
+            dqcdt  = fac*kes*sig*(dqdt*(ai4/ai3*teme-ter)+qm*(ai4/ai3*dtedt-dtrdt))
             #dqcdt  = 0
         #df1/dT
             df1dt  =-dqdt*rs/cc-dqcdt*rs/cc
