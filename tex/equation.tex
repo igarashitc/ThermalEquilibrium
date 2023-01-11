@@ -1,0 +1,203 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+
+%SetFonts
+
+%SetFonts
+
+
+\title{Equations}
+\author{Taichi Igarashi}
+%\date{}							% Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+\section{磁化した降着円盤の軸対称・定常解}
+\subsection{基礎方程式}
+軸対称・定常磁気流体方程式 (Oda et al. 2009)
+\begin{equation}
+	\frac{\partial}{r\partial r}\left( r\rho v_r \right) + \frac{\partial}{\partial z} = 0,
+\end{equation}
+\begin{equation}
+	\rho v_r\frac{\partial v_r}{\partial r} + \rho v_z\frac{\partial v_r}{\partial z} - \frac{\rho v_\varphi^2}{r} = -\rho\frac{\psi}{\partial r} - \frac{\partial p_{\rm tot}}{\partial r} - \frac{\langle B_\varphi^2 \rangle}{4\pi r^2},
+\end{equation}
+\begin{equation}
+	\rho v_r\frac{\partial v_\varphi}{\partial r} + \rho v_z\frac{\partial v_\varphi}{\partial z} + \frac{\rho v_rv_\varphi}{r} = \frac{\partial}{r^2\partial r}\left( r^2\frac{\langle B_rB_\varphi \rangle}{4\pi} \right) + \frac{\partial}{\partial z}\left( \frac{\langle B_\varphi B_z \rangle}{4\pi}\right),
+\end{equation}
+\begin{equation}
+	0 = -\frac{\partial \psi}{\partial z} - \frac{1}{\rho}\frac{\partial p_{\rm tot}}{\partial z},
+\end{equation}
+\begin{equation}
+	\frac{\partial}{\partial r}\left[\left( \rho\epsilon + p_{\rm gas} + p_{\rm rad} \right)v_r\right] + \frac{v_r}{r}\left( \rho\epsilon + p_{\rm g} + p_{\rm r} \right) + \frac{\partial}{\partial z}\left[\left( \rho\epsilon + p_{\rm gas} + p_{\rm rad}v_z \right)\right] - v_r\frac{\partial}{\partial r}(p_{\rm gas}+p_{\rm rad}) - v_z\frac{\partial}{\partial z}(p_{\rm gas}+p_{\rm rad}) = q^+ - q^-,
+\end{equation}
+\begin{equation}
+	0 = -\frac{\partial}{\partial z}\left[ v_z\langle B_z \rangle \right] - \frac{\partial}{\partial r}\left[ v_r \langle B_\varphi \rangle\right] + \left[ \nabla\times \langle \delta{v} \times \delta{B} \rangle\right]_\varphi - \left[ \eta\nabla\times\left( \nabla\times\langle{B}\rangle \right)\right].
+\end{equation}
+ここで、$\psi=-GM_{\rm BH}/r^3, \rho\epsilon=p_{\rm gas}/(\gamma-1) + 3p_{\rm rad}, q^+,$ and $q^-$ はそれぞれ、重力ポテンシャル、加熱率、冷却率。
+
+また、鉛直方向にはポリトロピック関係$p_{\rm tot}=K\rho^{(1+1/N)}$を仮定。
+ここで、
+\begin{equation}
+	\rho(r,z) = \rho_0(r) \exp{\left(1-\frac{z^2}{H^2}\right)^N},
+\end{equation}
+\begin{equation}
+	p_{\rm tot}(r,z) = p_{\rm tot,0}(r) \exp{\left(1-\frac{z^2}{H^2}\right)^{N+1}},
+\end{equation}
+\begin{equation}
+	T(r,z) = T_{0}(r) \exp{\left(1-\frac{z^2}{H^2}\right)}.
+\end{equation}
+添字の0は赤道面での値、また$\displaystyle H^2 = \frac{2(N+1)}{\Omega_{\rm K0}^2}\frac{p_{\rm tot,0}}{\rho_0}$は円盤の半厚み、$\displaystyle \Omega_{\rm K0} = \sqrt{\frac{GM_{\rm BH}}{r^3}}$はケプラー角速度。
+以上を鉛直方向に積分すると面密度、鉛直積分した圧力は
+\begin{equation}
+	\Sigma = \int^{+H}_{-H} \rho dz = 2\rho_0I_{\rm N} H,
+\end{equation}
+\begin{equation}
+	W_{\rm tot} = \int^{+H}_{-H} p_{\rm tot} dz = 2p_{\rm tot,0}I_{\rm N+1} H.
+\end{equation}
+ここで、$I_{\rm N} = (2^NN!)^2/(2N+1)!$。
+また、円盤半厚みは
+\begin{equation}
+	H^2 = \frac{2N+3)}{\Omega_{\rm K0}^2}\frac{W_{\rm tot}}{\Sigma}.
+\end{equation}
+と書き換えられる。
+ 
+ \subsection{鉛直積分した基礎方程式}
+ \begin{equation}
+	\dot{M} = -2\pi r\Sigma v_r = const.,
+\end{equation}
+\begin{equation}
+	\dot{M}(l - l_{\rm in}) = -2\pi r^2 \int^{+H}_{-H} \frac{\langle B_rB_\varphi \rangle}{4\pi} dz,
+\end{equation}
+\begin{equation}
+	\frac{\dot{M}}{2\pi r^2} \frac{W_{\rm rad}+W_{\rm gas}}{\Sigma}\xi = Q^+ - Q^-,
+\end{equation}
+\begin{equation}
+	\dot{\Phi} = \int^{+H}_{-H} v_r\langle B_\varphi \rangle dz = \int^{r_{\rm out}}_{r}\int^{+H}_{-H}\left[\left\{\nabla\times\langle\delta{v}\times\delta{B}\rangle\right\}_{\varphi} - \left\{\eta\nabla\times\left(\nabla\times\langle {B} \rangle \right)\right\} \right]drdz + const.
+	\label{eq4:ind}
+\end{equation}
+磁場は
+\begin{equation}
+	\Phi = B_\varphi H = \Phi_0(\Sigma/\Sigma_0)^\zeta.
+\end{equation}
+で定義。
+
+\subsection{加熱・冷却率}
+粘性加熱率：
+\begin{equation}
+	Q^+ = \int^{+H}_{-H} \frac{\langle B_rB_\varphi \rangle}{4\pi} r\frac{d\Omega}{dr} dz = -\alpha W_{\rm tot}r\frac{d\Omega}{dr}.
+\end{equation}
+
+移流冷却率：
+\begin{equation}
+	Q^-_{\rm adv} = \frac{\dot{M}}{2\pi r^2} \frac{W_{\rm rad}+W_{\rm gas}}{\Sigma}\xi
+\end{equation}
+
+光学的に薄い場合の輻射冷却率（制動放射）：
+\begin{equation}
+	Q^-_{\rm thin} = 6.2\times10^{20}\frac{I_{2N+1/2}}{2I_N^2}\frac{\Sigma^2}{H}T_0^{1/2},
+\end{equation}
+
+光学的に厚い場合の輻射冷却率：
+\begin{equation}
+	Q^-_{\rm thick} = \frac{16\sigma I_NT_0^4}{3\tau/2},
+\end{equation}
+ここで、$\tau=\tau_{\rm es}+\tau_{\rm abs}$, $\tau_{\rm es}=0.5\kappa_{\rm es}\Sigma$。
+また、吸収に対する光学的厚みは
+\begin{equation}
+	\tau_{\rm abs} = \frac{8I_{\rm N}^2}{3I_{\rm N+4}\tau}\frac{Q^+_{\rm thin}}{Q^-_{\rm thick}}.
+\end{equation}
+
+輻射冷却は、光学的に薄い場合と厚い場合に使える近似解(e.g., Hubney 1990, Abramowicz et al. 1995)
+\begin{equation}
+	Q^- = \frac{16\sigma I_N T^4_0}{3\tau/2 + \sqrt{3} + \tau_{\rm abs}^{-1}},
+\end{equation}
+を用いる。
+
+コンプトン散乱による冷却率：
+\begin{equation}
+	Q^-_{\rm Comp} = Q^-\kappa_{\rm es}\Sigma\frac{4k_{\rm b}}{m_{\rm e}c^2}\left( \frac{I_{\rm N+1}}{I_{\rm N}}T_{\rm e0} - T_{\rm r}\right).
+\end{equation}
+ここで、$T_{\rm e0}=\min{(T_0, 10^9\ \rm{K})}$は電子温度、$T_{\rm r} = (Q^-/(a_{\rm r}c))^{1/4}$は輻射温度。
+
+\subsection{解くべき方程式}
+$f_1 = Q^+ - Q^- - Q^-_{\rm Comp} - Q^-_{\rm adv},\  f_2 = W_{\rm tot} - W_{\rm gas} - W_{\rm rad} - W_{\rm mag}$ を連立し、ニュートン法で解く。
+\begin{equation}
+	f_1 = \frac{3}{2}\alpha W_{\rm t}\tilde\Omega - \frac{16\sigma I_3T_0^4}{3\tau/2 + \sqrt{3} + \tau_{\rm abs}^{-1}}\frac{r_{\rm s}}{c} - Q^-\kappa_{\rm es}\Sigma\frac{4k_{\rm b}}{m_{\rm e}c^2}\left( \frac{I_{\rm N+1}}{I_{\rm N}}T_0 - T_{\rm r}\right)\frac{r_{\rm s}}{c} -\frac{\dot{m}}{\tilde r^2}\frac{W_{\rm tot} - W_{\rm mag}}{\kappa_{\rm es}\Sigma}\xi,
+\end{equation}
+\begin{equation}
+	f_2 = \frac{\dot{m}(\tilde{l} - \tilde{l}_{\rm in})}{\tilde r^2\alpha}\frac{c^2}{\kappa_{\rm es}} - \frac{\Phi_0^2}{8\pi \tilde Hr_{\rm s}}\left(\frac{\Sigma}{\Sigma_0}\right)^{2\zeta} - \frac{I_4}{I_3}\frac{R}{\mu}\Sigma T_0 - \frac{1}{4c}  \frac{16\sigma I_{\rm N}T_0^4}{3\tau/2 + \sqrt{3} + \tau_{\rm abs}^{-1}} \frac{I_4}{I_3}\tilde Hr_{\rm s}\left(\tau + \frac{2}{\sqrt{3}}\right).
+\end{equation}
+ここで、$r=\tilde rr_{\rm s},\ \Omega = \frac{c}{r_{\rm s}}\sqrt{\frac{1}{2\tilde r^3}} = \frac{c}{r_{\rm s}}\tilde\Omega,\ H = \frac{1}{\tilde\Omega}\sqrt{2N+3}(\frac{W_{\rm tot}}{\Sigma})^{1/2}\frac{r_{\rm s}}{c}=\tilde Hr_{\rm s},\ \dot{M}=\dot{m}\dot{M}_{\rm Edd}$.
+
+\subsection{$f_1,f_2$の微分}
+\subsection*{$\frac{\partial f_1}{\partial\Sigma}$}
+\begin{equation}
+	\frac{\partial f_1}{\partial \Sigma} = - \frac{\partial Q^-}{\partial\Sigma}\frac{r_{\rm s}}{c} - \frac{\partial Q^-_{\rm Comp}}{\partial\Sigma}\frac{r_{\rm s}}{c} + \frac{\dot{m}}{\tilde r^2}\frac{\xi}{\kappa_{\rm es}\Sigma}\frac{\partial W_{\rm mag}}{\partial\Sigma} + \xi\frac{\dot{m}}{\tilde r^2}\frac{W_{\rm tot}-W_{\rm mag}}{\kappa_{\rm es}\Sigma^2}
+\end{equation}
+
+\begin{equation}
+	\frac{\partial Q^-_{\rm Comp}}{\partial\Sigma} = \frac{4k_{\rm b}}{m_{\rm e}c^2}\left[ (\kappa_{\rm es}\Sigma\frac{\partial Q^-}{\partial\Sigma} + \kappa_{\rm es}Q^-)(\frac{I_{\rm N+1}}{I_{\rm N}}T_{\rm e0} - T_{\rm r}) - \kappa_{\rm es}\Sigma Q^-\frac{\partial T_{\rm r}}{\partial\Sigma} \right]\frac{r_{\rm s}}{c}
+\end{equation}
+
+\begin{equation}
+	\frac{\partial Q^-}{\partial\Sigma} = -Q^-\frac{\frac{3}{2}\frac{\partial\tau}{\partial\Sigma}-\tau^{-2}_{\rm abs}\frac{\tau_{\rm abs}}{\partial\Sigma}}{3\tau/2 + \sqrt{3} + \tau_{\rm abs}^{-1}}
+\end{equation}
+
+\begin{equation}
+	\frac{\partial T_{\rm r}}{\partial\Sigma} = \frac{T_{\rm r}}{4Q^-}\frac{\partial Q^-}{\partial\Sigma}
+\end{equation}
+
+\begin{equation}
+	\frac{\partial\tau}{\partial\Sigma} = \frac{\partial\tau_{\rm abs}}{\partial\Sigma} + 0.5\kappa_{\rm es}
+\end{equation}
+
+\begin{equation}
+	\frac{\partial\tau_{\rm abs}}{\partial\Sigma} = \tau_{\rm abs}\frac{5/2}{\Sigma}
+\end{equation}
+
+\begin{equation}
+	\frac{\partial \tilde H}{\partial \Sigma} = -\frac{\tilde H}{2\Sigma}
+\end{equation}
+
+\subsection*{$\frac{\partial f_1}{\partial T}$}
+\begin{equation}
+	\frac{\partial f_1}{\partial T} = - \frac{\partial Q^-}{\partial T}\frac{r_{\rm s}}{c} - \frac{\partial Q^-_{\rm Comp}}{\partial T}\frac{r_{\rm s}}{c}
+\end{equation}
+
+\begin{equation}
+	\frac{\partial Q^-_{\rm Comp}}{\partial T} = \frac{4k_{\rm b}}{m_{\rm e}c^2}\kappa_{\rm es}\Sigma\left[ (\frac{I_{\rm N+1}}{I_{\rm N}}T_{\rm e0} - T_{\rm r})\frac{\partial Q^-}{\partial T} + Q^-(\frac{I_{\rm N+1}}{I_{\rm N}}\frac{\partial T_{\rm e0}}{\partial T} - \frac{\partial T_{\rm r}}{\partial T})\right]\frac{r_{\rm s}}{c}
+\end{equation}
+
+\begin{equation}
+	\frac{\partial T_{\rm r}}{\partial T} = \frac{T_{\rm r}}{4Q^-}\frac{\partial Q^-}{\partial T}
+\end{equation}
+
+\begin{equation}
+	\frac{\partial Q^-}{\partial T} = Q^-(\frac{4}{T_0} - \frac{\frac{3}{2}\frac{\partial\tau}{\partial T}-\tau^{-2}_{\rm abs}\frac{\tau_{\rm abs}}{\partial T}}{3\tau/2 + \sqrt{3} + \tau_{\rm abs}^{-1}})
+\end{equation}
+
+\begin{equation}
+	\frac{\partial\tau}{\partial T} = \frac{\partial\tau_{\rm abs}}{\partial T} = -\frac{7}{2}\frac{\tau_{\rm abs}}{T}
+\end{equation}
+	
+\subsection*{$\frac{\partial f_2}{\partial\Sigma}$}
+\begin{equation}
+	\frac{\partial f_2}{\partial\Sigma} = -\frac{\partial W_{\rm mag}}{\partial \Sigma} - \frac{I_{\rm N+1}}{4cI_{\rm N}}\tilde Hr_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial Q^-}{\partial \Sigma} - \frac{Q^-I_{\rm N+1}}{4cI_{\rm N}}r_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial\tilde H}{\partial \Sigma} - \frac{Q^-I_{\rm N+1}}{4cI_{\rm N}}\tilde Hr_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial T_0}{\partial \Sigma}
+\end{equation}
+
+\begin{equation}
+	\frac{\partial W_{\rm mag}}{\partial \Sigma} = \frac{W_{\rm mag}}{\Sigma}(2\zeta+0.5)
+\end{equation}
+
+\subsection*{$\frac{\partial f_2}{\partial T}$}
+\begin{equation}
+	\frac{\partial f_2}{\partial T} = -\frac{I_{\rm N+1}}{I_{\rm N}}\frac{R}{\mu}\Sigma - \frac{I_{\rm N+1}}{4cI_{\rm N}}\tilde Hr_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial Q^-}{\partial T}  -  \frac{Q^-I_{\rm N+1}}{4cI_{\rm N}}r_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial\tilde H}{\partial T}  -  \frac{Q^-I_{\rm N+1}}{4cI_{\rm N}}\tilde Hr_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial\tau}{\partial T} 
+\end{equation} 
+
+\end{document}  
