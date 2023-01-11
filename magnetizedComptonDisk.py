@@ -168,7 +168,7 @@ def plot(\
     #----------------------------------------------------------------#
     #SLE 
     if (sig.shape[0] != 0):
-        sig0  = sig[sig.shape[0]-1]*1.2
+        sig0  = sig[sig.shape[0]-1]*2
         dotm0 = dotm[dotm.shape[0]-1]
     dotm1 = dotm0*1e-14
     #plt.scatter(sig0,dotm0,color="k")
@@ -295,6 +295,7 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     #================================================================#
     num = 2000
     cnt = 0
+    it  = -1
 
     sig = sig0
     wt  = dotm0*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
@@ -311,6 +312,7 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     #=================================================================#
    
     for dotm in np.logspace(np.log10(dotm0), np.log10(dotm1), num):
+        it = it + 1
         #vertically integrated total pressure
         wt = dotm*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
 
@@ -318,73 +320,90 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         for i in range(1,20): 
         #Electron temperature
             teme   = min(tem, 1e9)
+            teme   = tem
 	    #Disk height
             hh     = 3.0e0*(np.sqrt(wt/sig)/cc)/omk
 	    #Electron scattering optical depth
             taues  = 0.5*kes*sig
 	    #Absorption optical depth
-            #tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3*ai7)*(sig*sig/hh)*tem**(-3.5)
-            tauabs = (6.2e20/(8.0e0*aa*cc*rs))*(ai65/ai3*ai7)*(sig*sig/hh)*teme**(-3.5)
+            tauabs = (6.2e20/(2.0e0*aa*cc*rs))*(ai65/(ai3*ai7))*(sig*sig/hh)*teme**(-3.5)
 	    #Total optical depth
             tau    = tauabs+0.5e0*kes*sig
 	    #Effective optical depth
-            #taueff = np.sqrt(tau*tauabs)
+            taueff = np.sqrt(tau*tauabs)
         #Denominator of radiative cooling rate
             qmd    = 1.5e0*tau+sqr3+1.0e0/tauabs
 	    #Radiative cooling rate
-            #qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
             qm     = 4.0e0*aa*cc*ai3*teme**4/qmd
         #Radiative temperature
             ter    = (qm/(aa*cc))**(0.25)
         #Compton cooling rate
-            #qc     = fac*qm*kes*sig*(ai4/ai3*(tem - ter))
-            qc     = fac*qm*rs/cc*kes*sig*(ai4/ai3*(teme - ter))
+            qc     = fac*qm*kes*sig*(ai4/ai3*(teme - ter))
+            #qc   = 0
         #Vertically integrated gas pressure
             wg     = (ai4/ai3)*(rr/xmu)*sig*tem
         #Vertically integrated radiation pressure
             wr     = (qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
  	    #Vertically integrated magnetic pressure
             wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
-        #f1=Q^+ - Q^-_rad - Q^-_adv
-            f1     = 1.5e0*alpha*wt*omk-qm*rs/cc-qc-(dotm/(r*r*kes))*((wt-wb)/sig)*xi
-        #f2=W_tot - W_mag - W_gas - W_rad
-            f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
+        #Q^-_adv
+            qa     = (dotm/(r*r*kes))*((wt-wb)/sig)*xi
+        #Q^+_vis
+            qv     = 1.5e0*alpha*wt*omk
+        #f1=Q^+ - Q^-_rad - Q^-_Comp - Q^-_adv
+            f1     = qv-qm*rs/cc-qc*rs/cc-qa
+        #f2=W_tot - W_gas - W_rad - W_mag
+            f2     = wt-wg-wr-wb
+
         #dH/d\Sigma
             dhds   =-0.5e0*hh/sig
-        #d\tau/dT
-            #dtdt   =-3.5e0*tauabs/tem
-            dtdt   =-3.5e0*tauabs/teme
         #d\tau_abs/d\Sigma
             dtads  = 2.5e0*tauabs/sig
         #d\tau/d\Sigma
             dtds   = dtads+0.5e0*kes
         #dQ^-/d\Sigma
             dqds   =-qm*(1.5e0*dtds-dtads/(tauabs**2e0))/qmd
-        #dQ^-/dT
-            #dqdt   = qm*(4.e0/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
-            dqdt   = qm*(4.e0/teme-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+        #dW_g/d\Sigma
+            dwgds  = (ai4/ai3)*(rr/xmu)*tem
+        #dW_r/d\Sigma
+            dwrds  = (ai4/(ai3*4e0*cc))*(dqds*hh*rs*(tau+2e0/sqr3) \
+                    +qm*(dhds*rs*(tau+2e0/sqr3)+hh*rs*dtds))
         #dW_b/d\Sigma
             dwbds  = wb*(2.0e0*ze+0.5e0)/sig
+        #dQ^-_adv/d\Sigma
+            dqads  =-(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi-(dotm/(r*r*kes*sig))*xi*dwbds
         #dT_r/d\Sigma
             dtrds  = 0.25e0*ter/qm*dqds
+        #dQ^_Comp/d\Sigma
+            dqcds  = fac*((kes*sig*dqds+kes*qm)*(ai4/ai3*teme-ter)-kes*sig*qm*dtrds)
+            #dqcds  = 0
+        #df1/d\Sigma
+            df1ds  =-dqds*rs/cc-dqcds*rs/cc-dqads
+        #df2/d\Sigma
+            df2ds  =-dwgds-dwrds-dwbds
+        
+        #d\tau/dT
+            dtdt   =-3.5e0*tauabs/teme
+        #dQ^-/dT
+            dqdt   = qm*(4.e0/teme-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+        #dQ^-_adv/dT
+            dqadt  = 0e0
+        #dWg/dT
+            dwgdt  = (ai4/ai3)*(rr/xmu)*sig
+        #dWr/dT
+            dwrdt  = (ai4/(ai3*4e0*cc))*hh*rs*(dqdt*(tau+2e0/sqr3)+qm*dtdt)
+        #dWb/dT
+            dwbdt  = 0e0
         #dT_r/dT
             dtrdt  = 0.25e0*ter/qm*dqdt
-        #df1/d\Sigma
-            #df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds \
-            #        -fac*((kes*sig*dqds + kes*qm)*(ai4/ai3*tem - ter) - kes*sig*qm*dtrds)
-            df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds \
-                    -fac*((kes*sig*dqds + kes*qm)*(ai4/ai3*teme - ter) - kes*sig*qm*dtrds)
+        #dQ^-_Comp/dT
+            dqcdt  = fac*kes*sig*(dqdt*(ai4/ai3*teme-ter)+qm*(ai4/ai3-dtrdt))
+            #dqcdt  = 0
         #df1/dT
-            #df1dt  =-dqdt*rs/cc \
-            #        -fac*kes*sig*(dqdt*(ai4/ai3*tem - ter) + qm*(ai4/ai3 - dtrdt))
-            df1dt  =-dqdt*rs/cc \
-                    -fac*kes*sig*(dqdt*(ai4/ai3*teme - ter) + qm*(ai4/ai3 - dtrdt))
-        #df2/d\Sigma
-            df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
-                    -(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
+            df1dt  =-dqdt*rs/cc-dqcdt*rs/cc
         #df2/dT
-            df2dt  =-(ai4/ai3)*(rr/xmu)*sig-(1.0e0/(4.0e0*cc))*dqdt*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3) \
-            	    -(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*dtdt
+            df2dt  =-dwgdt-dwrdt-dwbdt
+            
             dd     = df1ds*df2dt-df1dt*df2ds
             dsig   =-(f1*df2dt-f2*df1dt)/dd 
             dtem   =-(df1ds*f2-df2ds*f1)/dd

@@ -42,6 +42,7 @@ gg  = 6.6725e-8
 def plot(\
     #0:dotm, 1:wt, 2:tem
     yax = 0, \
+    clr = "k", \
     #================================================================# 
     #Physical parameter						                         #
     #================================================================#
@@ -142,7 +143,7 @@ def plot(\
 		s0=s0, ze=ze, p0=p0)
 
     print(sig.shape,"riaf")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax)
+    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
     #----------------------------------------------------------------#
     
     sig0  = sig[sig.shape[0]-1]
@@ -154,14 +155,14 @@ def plot(\
 		s0=s0, ze=ze, p0=p0)
     
     print(sig.shape,"riaf2")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax)
+    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
     #-----------------------------------------------------------------#
 
     #----------------------------------------------------------------#
     #SLE 
     #----------------------------------------------------------------#
     if (sig.shape[0] != 0):
-        sig0  = sig[sig.shape[0]-1]*2
+        sig0  = sig[sig.shape[0]-1]*1.2
         dotm0 = dotm[dotm.shape[0]-1]
     dotm1 = dotm0*1e-14
     #plt.scatter(sig0,dotm0,color="k")
@@ -171,7 +172,7 @@ def plot(\
 		s0=s0, ze=ze, p0=p0)
     
     print(sig.shape,"sle")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax)
+    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
     #-----------------------------------------------------------------#
 
     #----------------------------------------------------------------#
@@ -189,7 +190,7 @@ def plot(\
 		s0=s0, ze=ze, p0=p0)
     
     print(sig.shape,"md")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax)
+    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
     #-----------------------------------------------------------------#
     
     #-----------------------------------------------------------------#
@@ -205,7 +206,7 @@ def plot(\
 		s0=s0, ze=ze, p0=p0)
     
     print(sig.shape,"sad")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax)
+    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
     #-----------------------------------------------------------------#
     
     #-----------------------------------------------------------------#
@@ -222,7 +223,7 @@ def plot(\
 		s0=s0, ze=ze, p0=p0)
     
     print(sig.shape,"slim")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax)
+    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
     #-----------------------------------------------------------------#
     
     plt.loglog()
@@ -278,9 +279,8 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     # initial guess 
     #================================================================#
     num = 2000
-    #num = 2
     cnt = 0
-    it = -1
+    it  = -1
 
     sig = sig0
     wt  = dotm0*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
@@ -300,13 +300,9 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         it = it + 1
         #vertically integrated total pressure
         wt = dotm*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
-        #tem = wt/((ai4/ai3)*(rr/xmu)*sig)
 
         # iteration for newton
         for i in range(1,20):
-            tmp1   = tem
-            tmp2   = sig
-
         #Disk half thickness
             hh     = 3.0e0*(np.sqrt(wt/sig)/cc)/omk
         #Electron scattering optical depth
@@ -316,46 +312,65 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         #Total optical depth
             tau    = tauabs+0.5e0*kes*sig
         #Effective optical depth
-            #taueff = np.sqrt(tau*tauabs)
+            taueff = np.sqrt(tau*tauabs)
         #Denominator of radiative cooling rate
             qmd    = 1.5e0*tau+sqr3+1.0e0/tauabs
         #Radiative cooling rate
             qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
         #Vertically integrated gas pressure
-            wg    = (ai4/ai3)*(rr/xmu)*sig*tem 
+            wg     = (ai4/ai3)*(rr/xmu)*sig*tem 
         #Vertically integrated radiation pressure
-            wr    = (qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
+            wr     = qm*(ai4/(ai3*4.0e0*cc))*hh*rs*(tau+2.0e0/sqr3)
         #Vertically integrated magnetic pressure
             wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
+        #Q^-_adv
+            qa     = (dotm/(r*r*kes))*((wt-wb)/sig)*xi
+        #Q^+_vis
+            qv     = 1.5e0*alpha*wt*omk
         #f1=Q^+ - Q_rad - Q_adv
-            f1     = 1.5e0*alpha*wt*omk-qm*rs/cc-(dotm/(r*r*kes))*((wt-wb)/sig)*xi
-            #f1     = 1.5e0*alpha*wt*omk-qm*rs/cc-(dotm/(r*r*kes))*((wg+wr)/sig)*xi
-        #f2=W_tot - W_mag - W_gas - W_rad
-            f2     = wt-wb-(ai4/ai3)*(rr/xmu)*sig*tem-(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
+            f1     = qv-qm*rs/cc-qa
+        #f2=W_tot - W_gas - W_rad - W_mag
+            f2     = wt-wg-wr-wb
+
         #dH/d\Sigma
             dhds   =-0.5e0*hh/sig
-        #d\tau/dT
-            dtdt   = -3.5e0*tauabs/tem
         #d\tau_abs/d\Sigma
             dtads  = 2.5e0*tauabs/sig
         #d\tau/d\Sigma
             dtds   = dtads+0.5e0*kes
         #dQ^-/d\Sigma
             dqds   =-qm*(1.5e0*dtds-dtads/(tauabs**2))/qmd
-        #dQ^-/dT
-            dqdt   = qm*(4/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+        #dW_g/d\Sigma
+            dwgds  = (ai4/ai3)*(rr/xmu)*tem
+        #dW_r/d\Sigma
+            dwrds  = (ai4/(ai3*4e0*cc))*(dqds*hh*rs*(tau+2e0/sqr3) \
+                    +qm*(dhds*rs*(tau+2e0/sqr3)+hh*rs*dtds))
         #dW_b/d\Sigma
             dwbds  = wb*(2.0e0*ze+0.5e0)/sig
+        #dQ^-_adv/d\Sigma
+            dqads  =-(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi-(dotm/(r*r*kes*sig))*xi*dwbds
         #df1/d\Sigma
-            df1ds  =-dqds*rs/cc+(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi+(dotm/(r*r*kes*sig))*xi*dwbds
-        #df1/dT
-            df1dt  =-dqdt*rs/cc
+            df1ds  =-dqds*rs/cc-dqads
         #df2/d\Sigma
-            df2ds  =-(ai4/ai3)*(rr/xmu)*tem-(1.0e0/(4.0e0*cc))*(ai4/ai3)*dqds*hh*rs*(tau+2.0e0/sqr3) \
-            -(qm/(4.0e0*cc))*(ai4/ai3)*(dhds*rs*(tau+2.0e0/sqr3)+hh*rs*dtds)-dwbds
+            df2ds  =-dwgds-dwrds-dwbds
+        
+        #d\tau/dT
+            dtdt   = -3.5e0*tauabs/tem
+        #dQ^-/dT
+            dqdt   = qm*(4e0/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+        #dQ^-_adv/dT
+            dqadt  = 0e0
+        #dWg/dT
+            dwgdt  = (ai4/ai3)*(rr/xmu)*sig
+        #dWr/dT
+            dwrdt  = (ai4/(ai3*4e0*cc))*hh*rs*(dqdt*(tau+2e0/sqr3)+qm*dtdt)
+        #dWb/dT
+            dwbdt  = 0e0
+        #df1/dT
+            df1dt  =-dqdt*rs/cc-dqadt
         #df2/dT
-            df2dt  =-(ai4/ai3)*(rr/xmu)*sig-(1.0e0/(4.0e0*cc))*dqdt*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3) \
-            -(qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*dtdt
+            df2dt  =-dwgdt-dwrdt-dwbdt
+            
             dd     = df1ds*df2dt-df1dt*df2ds
             dsig   =-(f1*df2dt-f2*df1dt)/dd 
             dtem   =-(df1ds*f2-df2ds*f1)/dd
