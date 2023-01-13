@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2022.2.10)  7 JAN 2023 06:03
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2022.2.10)  12 JAN 2023 14:27
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -180,7 +180,7 @@ n/10.95 ^^@ \OML/cmm/m/it/10.95 q[];
 [1
 
 ] [2] [3]
-Overfull \hbox (9.23535pt too wide) detected at line 192
+Overfull \hbox (9.23535pt too wide) detected at line 198
 [] \OT1/cmr/m/n/10.95 = \OMS/cmsy/m/n/10.95 ^^@[] ^^@ [][]\OML/cmm/m/it/10.95 r
 []\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 ^^\ \OT1/cmr/m/n/10.95 + [])[] \OMS/c
 msy/m/n/10.95 ^^@ []\OML/cmm/m/it/10.95 r[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10
@@ -189,7 +189,7 @@ msy/m/n/10.95 ^^@ []\OML/cmm/m/it/10.95 r[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10
  []
 
 [4]
-Overfull \hbox (14.28975pt too wide) detected at line 201
+Overfull \hbox (14.28975pt too wide) detected at line 207
 [] \OT1/cmr/m/n/10.95 = \OMS/cmsy/m/n/10.95 ^^@[][]\OT1/cmr/m/n/10.95 ^^F \OMS/
 cmsy/m/n/10.95 ^^@ [][]\OML/cmm/m/it/10.95 r[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it
 /10.95 ^^\ \OT1/cmr/m/n/10.95 + [])[] \OMS/cmsy/m/n/10.95 ^^@ []\OML/cmm/m/it/1
@@ -202,10 +202,10 @@ cmsy/m/n/10.95 ^^@ [][]\OML/cmm/m/it/10.95 r[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it
 Here is how much of TeX's memory you used:
  1829 strings out of 479466
  25750 string characters out of 5870548
- 340236 words of memory out of 5000000
+ 341236 words of memory out of 5000000
  19549 multiletter control sequences out of 15000+600000
  416557 words of font info for 80 fonts, out of 8000000 for 9000
  929 hyphenation exceptions out of 8191
  68i,6n,74p,443b,257s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on equation.dvi (5 pages, 20644 bytes).
+Output written on equation.dvi (5 pages, 21140 bytes).

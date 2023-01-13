@@ -22,7 +22,7 @@
 \subsection{基礎方程式}
 軸対称・定常磁気流体方程式 (Oda et al. 2009)
 \begin{equation}
-	\frac{\partial}{r\partial r}\left( r\rho v_r \right) + \frac{\partial}{\partial z} = 0,
+	\frac{\partial}{r\partial r}\left( r\rho v_r \right) + \frac{\partial}{\partial z} (\rho v_z) = 0,
 \end{equation}
 \begin{equation}
 	\rho v_r\frac{\partial v_r}{\partial r} + \rho v_z\frac{\partial v_r}{\partial z} - \frac{\rho v_\varphi^2}{r} = -\rho\frac{\psi}{\partial r} - \frac{\partial p_{\rm tot}}{\partial r} - \frac{\langle B_\varphi^2 \rangle}{4\pi r^2},
@@ -123,7 +123,7 @@
 \begin{equation}
 	Q^-_{\rm Comp} = Q^-\kappa_{\rm es}\Sigma\frac{4k_{\rm b}}{m_{\rm e}c^2}\left( \frac{I_{\rm N+1}}{I_{\rm N}}T_{\rm e0} - T_{\rm r}\right).
 \end{equation}
-ここで、$T_{\rm e0}=\min{(T_0, 10^9\ \rm{K})}$は電子温度、$T_{\rm r} = (Q^-/(a_{\rm r}c))^{1/4}$は輻射温度。
+ここで、$T_{\rm e0}=\min{(T_0, 10^9\ \rm{K})}$は電子温度、$T_{\rm r} = (\frac{3\tau/2}{4a_{\rm r}cI_{\rm N}}Q^-)^{1/4}$は輻射温度。
 
 \subsection{解くべき方程式}
 $f_1 = Q^+ - Q^- - Q^-_{\rm Comp} - Q^-_{\rm adv},\  f_2 = W_{\rm tot} - W_{\rm gas} - W_{\rm rad} - W_{\rm mag}$ を連立し、ニュートン法で解く。
@@ -136,7 +136,7 @@ $f_1 = Q^+ - Q^- - Q^-_{\rm Comp} - Q^-_{\rm adv},\  f_2 = W_{\rm tot} - W_{\rm 
 ここで、$r=\tilde rr_{\rm s},\ \Omega = \frac{c}{r_{\rm s}}\sqrt{\frac{1}{2\tilde r^3}} = \frac{c}{r_{\rm s}}\tilde\Omega,\ H = \frac{1}{\tilde\Omega}\sqrt{2N+3}(\frac{W_{\rm tot}}{\Sigma})^{1/2}\frac{r_{\rm s}}{c}=\tilde Hr_{\rm s},\ \dot{M}=\dot{m}\dot{M}_{\rm Edd}$.
 
 \subsection{$f_1,f_2$の微分}
-\subsection*{$\frac{\partial f_1}{\partial\Sigma}$}
+\subsection*{$\displaystyle\frac{\partial f_1}{\partial\Sigma}$}
 \begin{equation}
 	\frac{\partial f_1}{\partial \Sigma} = - \frac{\partial Q^-}{\partial\Sigma}\frac{r_{\rm s}}{c} - \frac{\partial Q^-_{\rm Comp}}{\partial\Sigma}\frac{r_{\rm s}}{c} + \frac{\dot{m}}{\tilde r^2}\frac{\xi}{\kappa_{\rm es}\Sigma}\frac{\partial W_{\rm mag}}{\partial\Sigma} + \xi\frac{\dot{m}}{\tilde r^2}\frac{W_{\rm tot}-W_{\rm mag}}{\kappa_{\rm es}\Sigma^2}
 \end{equation}
@@ -150,7 +150,8 @@ $f_1 = Q^+ - Q^- - Q^-_{\rm Comp} - Q^-_{\rm adv},\  f_2 = W_{\rm tot} - W_{\rm 
 \end{equation}
 
 \begin{equation}
-	\frac{\partial T_{\rm r}}{\partial\Sigma} = \frac{T_{\rm r}}{4Q^-}\frac{\partial Q^-}{\partial\Sigma}
+	\frac{\partial T_{\rm r}}{\partial\Sigma} = %\frac{T_{\rm r}}{4Q^-}\frac{\partial Q^-}{\partial\Sigma}
+			\frac{T_{\rm r}}{4\tau Q^-}(Q^-\frac{\partial\tau}{\partial\Sigma} + \tau\frac{\partial Q^-}{\partial\Sigma})
 \end{equation}
 
 \begin{equation}
@@ -165,7 +166,7 @@ $f_1 = Q^+ - Q^- - Q^-_{\rm Comp} - Q^-_{\rm adv},\  f_2 = W_{\rm tot} - W_{\rm 
 	\frac{\partial \tilde H}{\partial \Sigma} = -\frac{\tilde H}{2\Sigma}
 \end{equation}
 
-\subsection*{$\frac{\partial f_1}{\partial T}$}
+\subsection*{$\displaystyle\frac{\partial f_1}{\partial T}$}
 \begin{equation}
 	\frac{\partial f_1}{\partial T} = - \frac{\partial Q^-}{\partial T}\frac{r_{\rm s}}{c} - \frac{\partial Q^-_{\rm Comp}}{\partial T}\frac{r_{\rm s}}{c}
 \end{equation}
@@ -175,7 +176,12 @@ $f_1 = Q^+ - Q^- - Q^-_{\rm Comp} - Q^-_{\rm adv},\  f_2 = W_{\rm tot} - W_{\rm 
 \end{equation}
 
 \begin{equation}
-	\frac{\partial T_{\rm r}}{\partial T} = \frac{T_{\rm r}}{4Q^-}\frac{\partial Q^-}{\partial T}
+	\frac{\partial T_{\rm r}}{\partial T} = %\frac{T_{\rm r}}{4Q^-}\frac{\partial Q^-}{\partial T}
+			\frac{T_{\rm r}}{4\tau Q^-}(Q^-\frac{\partial\tau}{\partial\Sigma} + \tau\frac{\partial Q^-}{\partial\Sigma})
+\end{equation}
+
+\begin{equation}
+	\frac{\partial T_{\rm e}}{\partial T} = 1
 \end{equation}
 
 \begin{equation}
@@ -186,7 +192,7 @@ $f_1 = Q^+ - Q^- - Q^-_{\rm Comp} - Q^-_{\rm adv},\  f_2 = W_{\rm tot} - W_{\rm 
 	\frac{\partial\tau}{\partial T} = \frac{\partial\tau_{\rm abs}}{\partial T} = -\frac{7}{2}\frac{\tau_{\rm abs}}{T}
 \end{equation}
 	
-\subsection*{$\frac{\partial f_2}{\partial\Sigma}$}
+\subsection*{$\displaystyle\frac{\partial f_2}{\partial\Sigma}$}
 \begin{equation}
 	\frac{\partial f_2}{\partial\Sigma} = -\frac{\partial W_{\rm mag}}{\partial \Sigma} - \frac{I_{\rm N+1}}{4cI_{\rm N}}\tilde Hr_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial Q^-}{\partial \Sigma} - \frac{Q^-I_{\rm N+1}}{4cI_{\rm N}}r_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial\tilde H}{\partial \Sigma} - \frac{Q^-I_{\rm N+1}}{4cI_{\rm N}}\tilde Hr_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial T_0}{\partial \Sigma}
 \end{equation}
@@ -195,7 +201,7 @@ $f_1 = Q^+ - Q^- - Q^-_{\rm Comp} - Q^-_{\rm adv},\  f_2 = W_{\rm tot} - W_{\rm 
 	\frac{\partial W_{\rm mag}}{\partial \Sigma} = \frac{W_{\rm mag}}{\Sigma}(2\zeta+0.5)
 \end{equation}
 
-\subsection*{$\frac{\partial f_2}{\partial T}$}
+\subsection*{$\displaystyle\frac{\partial f_2}{\partial T}$}
 \begin{equation}
 	\frac{\partial f_2}{\partial T} = -\frac{I_{\rm N+1}}{I_{\rm N}}\frac{R}{\mu}\Sigma - \frac{I_{\rm N+1}}{4cI_{\rm N}}\tilde Hr_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial Q^-}{\partial T}  -  \frac{Q^-I_{\rm N+1}}{4cI_{\rm N}}r_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial\tilde H}{\partial T}  -  \frac{Q^-I_{\rm N+1}}{4cI_{\rm N}}\tilde Hr_{\rm s}(\tau+\frac{2}{\sqrt{3}})\frac{\partial\tau}{\partial T} 
 \end{equation} 
