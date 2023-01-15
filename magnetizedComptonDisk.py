@@ -50,6 +50,9 @@ def plot(\
     #0:dotm, 1:wt, 2:tem
     yax = 0, \
     clr = "k", \
+    fa = 1.4, fb = 1.0, \
+    #fa = 1.1, fb = 1.0, \
+    #fa = 1.4, fb = 1.2, \
     #================================================================# 
     #Physical parameter						                         #
     #================================================================#
@@ -184,8 +187,10 @@ def plot(\
     #----------------------------------------------------------------#
     #Magnetized disk
     if (sig.shape[0] != 0):
-        sig0  = sig[sig.shape[0]-1]*1.4
-        dotm0 = dotm[dotm.shape[0]-1]*1
+        sig0  = sig[sig.shape[0]-1]*fa
+        #sig0  = sig[sig.shape[0]-1]*2
+        dotm0 = dotm[dotm.shape[0]-1]*fb
+        #dotm0 = dotm[dotm.shape[0]-1]*1.2
     #sig0  = 10
     #dotm0 = 0.01
     dotm1 = dotm0*1e12
@@ -346,7 +351,8 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         #Vertically integrated radiation pressure
             wr     = (qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
  	    #Vertically integrated magnetic pressure
-            wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
+            #wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
+            wb     = 2e0*(p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
         #Q^-_adv
             qa     = (dotm/(r*r*kes))*((wt-wb)/sig)*xi
         #Q^+_vis
