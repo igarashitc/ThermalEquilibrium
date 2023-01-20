@@ -211,6 +211,7 @@ def plot(\
     
     #-----------------------------------------------------------------#
     #Slim disk
+    #-----------------------------------------------------------------#
     sig0  = 1e6
     #sig0 = sig[sig.shape[0]-1]
     dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*1.001
@@ -225,7 +226,19 @@ def plot(\
     print(sig.shape,"slim")
     plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
     #-----------------------------------------------------------------#
-    
+
+    #=================================================================#
+    #pmag = pgas+prad
+    #-----------------------------------------------------------------#
+
+    dotm,sig,wt = pmag_eq_pgpr(bhm=bhm,r=r,ellin=ellin,alpha=alpha,s0=s0,ze=ze,p0=p0)
+    if (yax == 0):
+        plt.plot(sig,dotm,color=clr,linestyle="dashed")
+    elif (yax == 1):
+        plt.plot(sig,wt,color=clr,linestyle="dashed")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+
     plt.loglog()
 
     return 
@@ -429,4 +442,145 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     dotm_rt = wt_rt/( (ell-ellin)*(cc*cc/kes)/(r*r*alpha) )
     
     return dotm_rt,sig_rt,tem_rt,wt_rt,bt_rt,qm_rt,qa_rt,qv_rt
+
+def uni_taueff(bhm=1e7, r=40e0, ellin=1.7e0, alpha=0.03, s0=10, ze=0.5, p0=1e17):
+  
+    #================================================================# 
+    #Physical parameter						                         #
+    #================================================================#
+    #----------------------------------------------------------------#
+    #Schwartzchild radius
+    rs  = 3.0e5*bhm
+    #----------------------------------------------------------------#
+    #Keplerian rotation 
+    omk = np.sqrt(0.5e0/r**3)
+    #----------------------------------------------------------------#
+    #angular momentum
+    ell = r*r*omk
+    #================================================================#
+    
+    num = 2000
+
+    sig_rt = np.logspace(0,5,num)
+    wt_rt  = np.full(1, 1)
+
+    for iso in range(1,num):
+        sig = sig_rt[iso]
+        wt  = wt_rt[iso-1]
+        for i in range(1,20):
+            #disk half thickness
+            hh = 3e0*(sqrt(wt/sig)/cc)/omk
+            #Thomson optical depth
+            taues = 0.5e0*kes*sig
+            #absorption optical depth
+            tau   = 0.5e0*kes*sig
+            tauabs= 1e0/tau
+            #temperature
+            tem   = (6.2e20*(ai65/(ai3*ai7))*0.5e0*kes*omk/(3e0*aa*rs))**(2e0/7e0) \
+                    *sig*wt**(-1e0/7e0)
+            #
+            qmd   = 1.5e0*tau+sqr3+1e0/tauabs
+            qm    = 4e0*aa*cc*ai3*tem**4/qmd
+            wb    = p0**2*(sig/s0)**(2*ze)/(8e0*np.pi*hh*rs)
+            wg    = (ai4/ai3)*(rr/xmu)*sig*tem
+            wr    = (qm/(4e0*cc))*(ai4/ai3)*hh*rs*(tau+2e0/sqr3)
+            f2    = wt-wb-wg-wr
+            
+            dhdw  = hh/(2e0*wt)
+            dtedw =-tem/(7e0*wt)
+            dqdw  = qm*4e0*dtedw/tem
+            df2dw = 1e0+p0*p0*(sig/s0)**(2e0*ze)*dhdw/(8e0*np.pi*hh*hh*rs) \
+                   -(ai4/ai3)*(rr/xmu)*sig*dtedw \
+                   -(qm/(4e0*cc))*(ai4/ai3)*hh*rs*(tau+2e0/sqr3)*(dqdw/qm+dhdw/hh)
+            dw    =-f2/df2dw
+            wt    = wt+dw
+            if (abs(dw/wt) < 1e-10):
+                wt_rt.append(wt_rt, wt)
+    
+    sig_rt = np.delete(sig_rt, 0)
+    wt_rt = np.delete(wt_rt, 0)
+    dotm_rt = wt_rt/((ell-ellin)*(cc*cc/kes)/(r*r*alpha))
+
+    return dotm_rt,sig_rt,wt_rt
+
+def pgas_eq_prad(bhm=1e7, r=40e0, ellin=1.7e0, alpha=0.03, s0=10, ze=0.5, p0=1e17):
+  
+    #================================================================# 
+    #Physical parameter						                         #
+    #================================================================#
+    #----------------------------------------------------------------#
+    #Schwartzchild radius
+    rs  = 3.0e5*bhm
+    #----------------------------------------------------------------#
+    #Keplerian rotation 
+    omk = np.sqrt(0.5e0/r**3)
+    #----------------------------------------------------------------#
+    #angular momentum
+    ell = r*r*omk
+    #================================================================#
+    
+    num = 2000
+
+    sig_rt = np.logspace(0,5,num)
+    wt_rt  = np.full(1, 1)
+
+    for iso in range(1,num):
+        sig = sig_rt[iso]
+        wt  = wt_rt[iso-1]
+        for i in range(1,20):
+            #disk half thickness
+            hh = 3e0*(sqrt(wt/sig)/cc)/omk
+            #Thomson optical depth
+            taues = 0.5e0*kes*sig
+            tem   = (wt-p0*p0*((sig/s0)**(2e0*ze))/(8e0*pi*hh*rs))/(2e0*(ai4/ai3)*(rr/xmu))
+            tauabs= (6.2e20/(2e0*aa*cc*rs))*(ai65/(ai3*ai7))*(sig*sig/hh)*tem**(-3.5e0)
+            qmd   = 1.5e0*tau+sqr3+1e0/tauabs
+            qm    = 4e0*aa*cc*ai3*tem**4/qmd
+            wb    = p0**2*(sig/s0)**(2*ze)/(8e0*np.pi*hh*rs)
+            wg    = (ai4/ai3)*(rr/xmu)*sig*tem
+            wr    = (qm/(4e0*cc))*(ai4/ai3)*hh*rs*(tau+2e0/sqr3)
+            f     = wg - wr 
+            
+            dhdw  = hh/(2e0*wt)
+            dtedw = (1e0+p0*p0*((sig/s0)**(2e0*ze)*dhdw)/(8e0*pi*hh*hh*rs)) \
+                    /(2e0*(ai4/ai3)*(rr/xmu)*sig)
+            dtqdw = tauabs(*-dhdw/hh-3.5e0*dtedw/tem)
+            dqdw  = qm*(4e0*dtedw/tem-(1.5e0*dtadw-dtadw/(tauabs**2))/qmd)
+            dfdw  = (ai4/ai3)*(rr/xmu)*sig*dtedw- \
+                    (qm/(4e0*cc))*(ai4/ai3)*hh*rs*(tau+2e0/sqr3)*(dqdw/qm+dhdw/hh)* \
+                    (dqdw/qm+dhdw/hh+dtadw/(tau+2e0/sqr3))
+            dw    =-f/dfdw
+            wt    = wt+dw
+            if (abs(dw/wt) < 1e-10):
+                wt_rt.append(wt_rt, wt)
+    
+    sig_rt = np.delete(sig_rt, 0)
+    wt_rt = np.delete(wt_rt, 0)
+    dotm_rt = wt_rt/((ell-ellin)*(cc*cc/kes)/(r*r*alpha))
+
+    return dotm_rt,sig_rt,wt_rt
+
+def pmag_eq_pgpr(bhm=1e7, r=40e0, ellin=1.7e0, alpha=0.03, s0=10, ze=0.5, p0=1e17):
+  
+    #================================================================# 
+    #Physical parameter						                         #
+    #================================================================#
+    #----------------------------------------------------------------#
+    #Schwartzchild radius
+    rs  = 3.0e5*bhm
+    #----------------------------------------------------------------#
+    #Keplerian rotation 
+    omk = np.sqrt(0.5e0/r**3)
+    #----------------------------------------------------------------#
+    #angular momentum
+    ell = r*r*omk
+    #================================================================#
+    
+    num = 2000
+
+    sig_rt = np.logspace(0,5,num)
+    wt_rt  = (p0*p0*cc*omk/(12e0*np.pi*rs))**(2e0/3e0)*((sig_rt/s0)**(4e0*ze/3e0))*sig_rt**(1e0/3e0)
+    dotm_rt = wt_rt/((ell-ellin)*(cc*cc/kes)/(r*r*alpha))
+
+    return dotm_rt,sig_rt,wt_rt
 
