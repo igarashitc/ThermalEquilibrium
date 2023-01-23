@@ -238,6 +238,19 @@ def plot(\
     plot_fork(sig,dotm,wt,tem,bt,qm,qc,qa,qv,yax=yax,clr=clr)
     #-----------------------------------------------------------------#
 
+    #=================================================================#
+    #pmag = pgas+prad
+    #-----------------------------------------------------------------#
+
+    dotm,sig,wt = pmag_eq_pgpr(bhm=bhm,r=r,ellin=ellin,alpha=alpha,s0=s0,ze=ze,p0=p0)
+    if (yax == 0):
+        plt.plot(sig,dotm,color=clr,linestyle="dashed")
+    elif (yax == 1):
+        plt.plot(sig,wt,color=clr,linestyle="dashed")
+    else:
+        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    #-----------------------------------------------------------------#
+
     return 
 
 def plot_fork(sig, dotm, wt, tem, bt, qm, qc, qa, qv, yax=0, clr="k"):
@@ -603,7 +616,8 @@ def pmag_eq_pgpr(bhm=1e7, r=40e0, ellin=1.7e0, alpha=0.03, s0=10, ze=0.5, p0=1e1
     num = 2000
 
     sig_rt = np.logspace(0,5,num)
-    wt_rt  = (p0*p0*cc*omk/(12e0*np.pi*rs))**(2e0/3e0)*((sig_rt/s0)**(4e0*ze/3e0))*sig_rt**(1e0/3e0)
+    #wt_rt  = (p0*p0*cc*omk/(12e0*np.pi*rs))**(2e0/3e0)*((sig_rt/s0)**(4e0*ze/3e0))*sig_rt**(1e0/3e0)
+    wt_rt  = (2e0*p0*p0*cc*omk/(12e0*np.pi*rs))**(2e0/3e0)*((sig_rt/s0)**(4e0*ze/3e0))*sig_rt**(1e0/3e0)
     dotm_rt = wt_rt/((ell-ellin)*(cc*cc/kes)/(r*r*alpha))
 
     return dotm_rt,sig_rt,wt_rt
