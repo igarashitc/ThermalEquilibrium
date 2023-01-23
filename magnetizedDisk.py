@@ -579,7 +579,8 @@ def pmag_eq_pgpr(bhm=1e7, r=40e0, ellin=1.7e0, alpha=0.03, s0=10, ze=0.5, p0=1e1
     num = 2000
 
     sig_rt = np.logspace(0,5,num)
-    wt_rt  = (p0*p0*cc*omk/(12e0*np.pi*rs))**(2e0/3e0)*((sig_rt/s0)**(4e0*ze/3e0))*sig_rt**(1e0/3e0)
+    wt_rt  = (p0*p0*cc*omk/(12e0*np.pi*rs))**(2e0/3e0)* \
+             ((sig_rt/s0)**(4e0*ze/3e0))*sig_rt**(1e0/3e0)
     dotm_rt = wt_rt/((ell-ellin)*(cc*cc/kes)/(r*r*alpha))
 
     return dotm_rt,sig_rt,wt_rt
