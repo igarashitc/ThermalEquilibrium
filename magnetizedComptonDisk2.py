@@ -5,6 +5,7 @@
 #							                                   #
 #                                 2021.12.28 by RM             #
 #                          revisede for python 2021.1.2 by TI  #
+#		     implement Compton cooling 2022.12.8 by TI         #
 #==============================================================#    
 
 #==============================================================#
@@ -17,7 +18,7 @@ import matplotlib.pyplot as plt
 #==============================================================#
 sqr3= np.sqrt(3.0e0)
 #
-#I_N = (2^N*N!)^2/((2N+1)!)
+#I_N = (2^N*N!)/((2N+1)!)
 #N = 3 e.g., Oda et al. 2009
 #
 ai3 = 16.0/35.0
@@ -37,12 +38,21 @@ aa  = 7.5646e-15
 cc  = 2.9979e10
 #gravitational constatn
 gg  = 6.6725e-8
+#electron mass 
+me  = 9.1094e-28
+#boltzmann constant
+kb  = 1.3807e-16
+#for Compton cooling
+fac = 4e0*kb/(me*cc*cc)
 #================================================================#
 
 def plot(\
     #0:dotm, 1:wt, 2:tem
     yax = 0, \
     clr = "k", \
+    fa = 1.4, fb = 1.0, \
+    #fa = 1.1, fb = 1.0, \
+    #fa = 1.4, fb = 1.2, \
     #================================================================# 
     #Physical parameter						                         #
     #================================================================#
@@ -76,6 +86,10 @@ def plot(\
     #alpha = 0.30, \
     #alpha = 0.60, \
     #----------------------------------------------------------------#
+    #diffusion alpha
+    #----------------------------------------------------------------#
+    alphap = 0.7, \
+    #----------------------------------------------------------------#
     # initial magnetic flux
     # \Phi = \Phi_0 (\Sigma/\Sigma_0)^\zeta
     # Different from Oda et al. 2009, 2012
@@ -88,17 +102,16 @@ def plot(\
     #s0  = 1e2, \
     #----------------------------------------------------------------#
     #\zeta
-    ze  = 0.5, \
+    #ze  = 0.5, \
     #ze  = 0.6, \
-    #ze  = 1.0, \
+    ze  = 1.0, \
     #----------------------------------------------------------------#
     #\Phi_0
     #p0 = 3e17 \
     #p0 = 1e17 \
-    #p0 = 8e16 \
-    #p0 = 3e16 \
+    p0 = 3e16 \
     #p0 = 1e16 \
-    p0 = 8e15 \
+    #p0 = 8e15 \
     #p0 = 1e15 \
     #p0 = 3e10 \
     #p0 = 0e0 \
@@ -106,7 +119,7 @@ def plot(\
     ):
     #================================================================#
 
-    #----------------------------------------------------------------#
+    #================================================================#
     #parameters
     #----------------------------------------------------------------#
     #Schwartzchild radius
@@ -120,7 +133,7 @@ def plot(\
     #Keplerian rotation 
     #----------------------------------------------------------------#
     omk = np.sqrt(0.5e0/r**3)
-    #----------------------------------------------------------------#
+    #================================================================#
 
     #----------------------------------------------------------------#
     #upper limit for RIAF (Abramowicz et al. 1995)
@@ -135,141 +148,144 @@ def plot(\
     #----------------------------------------------------------------#
     sig0  = tmp1*1e-4
     dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*2
-    dotm1 = np.sqrt(bb*tmp1**3)
-    #plt.scatter(sig0,dotm0)
+    dotm1 = np.sqrt(bb*tmp1**3)*100
+    tmp = dotm1
+    plt.scatter(sig0,dotm1)
     
-    dotm,sig,tem,wt,bt,qm,qa,qv = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+    dotm,sig,tem,wt,bt,qm,qc,qa,qv,taueff = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha ,alphap=alphap, \
 		s0=s0, ze=ze, p0=p0)
 
     print(sig.shape,"riaf")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
-    #----------------------------------------------------------------#
+    plot_fork(sig,dotm,wt,tem,bt,qm,qc,qa,qv,taueff,yax=yax,clr="red")
+    #----------------------------------------------------------------# 
+    if (sig.shape[0] != 0):
+        sig0  = sig[sig.shape[0]-1]
+        dotm0 = dotm[dotm.shape[0]-1]
+    dotm1 = dotm0*10
     
-    sig0  = sig[sig.shape[0]-1]
-    dotm0 = dotm[dotm.shape[0]-1]
-    dotm1 = dotm0*2
-    
-    dotm,sig,tem,wt,bt,qm,qa,qv = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+    dotm,sig,tem,wt,bt,qm,qc,qa,qv,taueff = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha, alphap=alphap, \
 		s0=s0, ze=ze, p0=p0)
     
     print(sig.shape,"riaf2")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
+    plot_fork(sig,dotm,wt,tem,bt,qm,qc,qa,qv,taueff,yax=yax,clr="red")
     #-----------------------------------------------------------------#
 
     #----------------------------------------------------------------#
     #SLE 
-    #----------------------------------------------------------------#
     if (sig.shape[0] != 0):
         sig0  = sig[sig.shape[0]-1]*1.2
-        dotm0 = dotm[dotm.shape[0]-1]
-    dotm1 = dotm0*1e-14
-    #plt.scatter(sig0,dotm0,color="k")
+        dotm0 = dotm[dotm.shape[0]-1]*0.8
+    dotm1 = dotm0*1e-20
+    plt.scatter(sig0,dotm0,color="k")
     
-    dotm,sig,tem,wt,bt,qm,qa,qv = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+    dotm,sig,tem,wt,bt,qm,qc,qa,qv,taueff = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha, alphap=alphap, \
 		s0=s0, ze=ze, p0=p0)
     
     print(sig.shape,"sle")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
+    plot_fork(sig,dotm,wt,tem,bt,qm,qc,qa,qv,taueff,yax=yax,clr="yellow")
     #-----------------------------------------------------------------#
 
     #----------------------------------------------------------------#
     #Magnetized disk
     if (sig.shape[0] != 0):
-        sig0  = sig[sig.shape[0]-1]*1.4
-        dotm0 = dotm[dotm.shape[0]-1]*1
+        sig0  = sig[sig.shape[0]-1]*fa
+        #sig0  = sig[sig.shape[0]-1]*2
+        dotm0 = dotm[dotm.shape[0]-1]*fb
+        #dotm0 = dotm[dotm.shape[0]-1]*1.2
     #sig0  = 10
     #dotm0 = 0.01
-    dotm1 = dotm0*1e12
-    #plt.scatter(sig0,dotm0,color="k")
+    dotm1 = dotm0*1e20
+    plt.scatter(sig0,dotm0,color="k")
     
-    dotm,sig,tem,wt,bt,qm,qa,qv = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+    dotm,sig,tem,wt,bt,qm,qc,qa,qv,taueff = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha, alphap=alphap, \
 		s0=s0, ze=ze, p0=p0)
     
     print(sig.shape,"md")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
-    #-----------------------------------------------------------------#
+    plot_fork(sig,dotm,wt,tem,bt,qm,qc,qa,qv,taueff,yax=yax,clr="green")
+    #----------------------------------------------------------------#
     
     #-----------------------------------------------------------------#
     #Standard-slim disk
     if (sig.shape[0] != 0):
-        sig0  = sig[sig.shape[0]-1]
+        sig0  = sig[sig.shape[0]-1]*1.2
         dotm0 = dotm[dotm.shape[0]-1]
     dotm1 = dotm0*1e8
-    #plt.scatter(sig0,dotm0)
+    plt.scatter(sig0,dotm0)
     
-    dotm,sig,tem,wt,bt,qm,qa,qv = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+    dotm,sig,tem,wt,bt,qm,qc,qa,qv,taueff = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha, alphap=alphap,\
 		s0=s0, ze=ze, p0=p0)
     
     print(sig.shape,"sad")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
+    plot_fork(sig,dotm,wt,tem,bt,qm,qc,qa,qv,taueff,yax=yax,clr=clr)
     #-----------------------------------------------------------------#
-    
+
     #-----------------------------------------------------------------#
     #Slim disk
     #-----------------------------------------------------------------#
     sig0  = 1e6
     #sig0 = sig[sig.shape[0]-1]
-    dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*1.001
+    #dotm0 = cc*rs/mded*3e0*np.pi*r**2e0*omk/xi*alpha*sig0*1.001
     #dotm0 = (9*kes/(128*cc*ai3)*(rr/xmu)**4*alpha*omk*(rs/cc)**2)**1/3e0*2*np.pi*alpha*r**2/(r*r*omk-ellin)/mded*sig0**(5e0/3e0)
-    dotm1 = dotm0*1e-8
-    #plt.scatter(sig0,dotm0)
+    dotm0 = 1e-3
+    dotm1 = dotm0*1e8
+    plt.scatter(sig0,dotm0)
     
-    dotm,sig,tem,wt,bt,qm,qa,qv = thermal_equil_newton(dotm0, dotm1, sig0,\
-        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha,\
+    dotm,sig,tem,wt,bt,qm,qc,qa,qv,taueff = thermal_equil_newton(dotm0, dotm1, sig0,\
+        bhm=bhm, r=r, ellin=ellin, xi=xi, alpha=alpha, alphap=alphap,\
 		s0=s0, ze=ze, p0=p0)
     
     print(sig.shape,"slim")
-    plot_fork(sig,dotm,wt,tem,bt,qm,qa,qv,yax=yax,clr=clr)
+    plot_fork(sig,dotm,wt,tem,bt,qm,qc,qa,qv,taueff,yax=yax,clr=clr)
     #-----------------------------------------------------------------#
 
     #=================================================================#
     #pmag = pgas+prad
     #-----------------------------------------------------------------#
 
-    dotm,sig,wt = pmag_eq_pgpr(bhm=bhm,r=r,ellin=ellin,alpha=alpha,s0=s0,ze=ze,p0=p0)
-    if (yax == 0):
-        plt.plot(sig,dotm,color=clr,linestyle="dashed")
-    elif (yax == 1):
-        plt.plot(sig,wt,color=clr,linestyle="dashed")
-    else:
-        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
-
-    plt.loglog()
+    #dotm,sig,wt = pmag_eq_pgpr(bhm=bhm,r=r,ellin=ellin,alpha=alpha,s0=s0,ze=ze,p0=p0)
+    #if (yax == 0):
+    #    plt.plot(sig,dotm,color=clr,linestyle="dashed")
+    #elif (yax == 1):
+    #    plt.plot(sig,wt,color=clr,linestyle="dashed")
+    #else:
+    #    print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    #-----------------------------------------------------------------#
 
     return 
 
-def plot_fork(sig, dotm, wt, tem, bt, qm, qa, qv, yax=0, clr="k"):
+def plot_fork(sig, dotm, wt, tem, bt, qm, qc, qa, qv, taueff, yax=0, clr="k"):
+    
     if (yax == 0):
         plt.plot(sig,dotm,color=clr)
+        plt.loglog()
     elif (yax == 1):
         plt.plot(sig,wt,color=clr)
+        plt.loglog()
     elif (yax == 2):
         plt.plot(sig,tem,color=clr)
+        plt.loglog()
     elif (yax == 3):
         plt.plot(sig,bt,color=clr)
+        plt.loglog()
     elif (yax == 4):
-        plt.plot(sig,qm,color=clr,linestyle="dotted")
+        plt.plot(sig,qm,color=clr,linestyle="dashdot")
+        plt.plot(sig,qc,color=clr,linestyle="dotted")
         plt.plot(sig,qa,color=clr,linestyle="dashed")
         plt.plot(sig,qv,color=clr)
-        plt.plot(sig,qv-qm-qa,color=clr)
+        #plt.plot(sig,qv-qm-qc-qa,color=clr)
         plt.xscale("log")
     elif (yax == 5):
-        r   = 40
-        rs  = 3e5*1e7
-        omk = np.sqrt(0.5e0/r**3)
-        hh  = 3e0*(np.sqrt(wt/sig)/cc)/omk
-        tauabs = (6.2e20/(2.0e0*aa*cc*rs))*(ai65/(ai3*ai7))*(sig*sig/hh)*tem**(-3.5)
-        tau = 0.5e0*kes*sig+tauabs
-        tr1 = (2e0*ai3**2e0*hh*qm/(6.2e20*ai65*sig**2e0))**2e0
-        tr2 = (1.5e0*tau*qm/(4e0*aa*cc*ai3))**0.25e0
-        plt.plot(sig,tr1,color="red")
-        plt.plot(sig,tr2,color=clr)
-        plt.plot(sig,tem,linestyle="dashed")
+        plt.plot(sig,tem,color=clr)
+        plt.plot(sig,(qm/(aa*cc))**(0.25),color=clr,linestyle="dashed")
+        plt.loglog()
+    elif (yax == 6):
+        plt.plot(sig,taueff,color=clr)
+        plt.loglog()
     else:
         print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
 
@@ -283,7 +299,7 @@ def plot_fork(sig, dotm, wt, tem, bt, qm, qa, qv, yax=0, clr="k"):
 # except for the determination of the magnetic flux.
 #===================================================================#
 def thermal_equil_newton(dotm0, dotm1, sig0, \
-		bhm=1e7, r=40e0, ellin=1.7e0, xi=1e0, alpha=0.03, alphap=0.7\
+		bhm=1e7, r=40e0, ellin=1.7e0, xi=1e0, alpha=0.03, alphap=0.7,\
 		s0=10, ze=0.5, p0=1e17):
 
     #================================================================# 
@@ -309,16 +325,17 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
 
     sig = sig0
     wt  = dotm0*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
-    tem = wt/((ai4/ai3)*(rr/xmu)*sig) 
-    #print("te",ell,ellin,(ell-ellin)*(cc*cc/kes)/(r*r*alpha))
+    tem = wt/((ai4/ai3)*(rr/xmu)*sig)
 
     sig_rt  = np.full(1, sig)
     tem_rt  = np.full(1, tem)
     wt_rt   = np.full(1, wt )
     bt_rt   = np.full(1, wt )
     qm_rt   = np.full(1, wt )
+    qc_rt   = np.full(1, wt )
     qa_rt   = np.full(1, wt )
     qv_rt   = np.full(1, wt )
+    taueff_rt = np.full(1, wt)
     #=================================================================#
    
     for dotm in np.logspace(np.log10(dotm0), np.log10(dotm1), num):
@@ -327,33 +344,45 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         wt = dotm*(ell-ellin)*(cc*cc/kes)/(r*r*alpha)
 
         # iteration for newton
-        for i in range(1,20):
-        #Disk half thickness
+        for i in range(1,20): 
+        #Electron temperature
+            teme   = min(tem, 1e10)
+            teme   = tem
+	    #Disk height
             hh     = 3.0e0*(np.sqrt(wt/sig)/cc)/omk
-        #Electron scattering optical depth
+	    #Electron scattering optical depth
             taues  = 0.5*kes*sig
-        #Absorption optical depth
-            tauabs = (6.2e20/(2.0e0*aa*cc*rs))*(ai65/(ai3*ai7))*(sig*sig/hh)*tem**(-3.5)
-        #Total optical depth
+	    #Absorption optical depth
+            tauabs = (6.2e20/(2.0e0*aa*cc*rs))*(ai65/(ai3*ai7))*(sig*sig/hh)*teme**(-3.5)
+	    #Total optical depth
             tau    = tauabs+0.5e0*kes*sig
-        #Effective optical depth
+	    #Effective optical depth
             taueff = np.sqrt(tau*tauabs)
         #Denominator of radiative cooling rate
             qmd    = 1.5e0*tau+sqr3+1.0e0/tauabs
-        #Radiative cooling rate
-            qm     = 4.0e0*aa*cc*ai3*tem**4/qmd
+	    #Radiative cooling rate
+            qm     = 4.0e0*aa*cc*ai3*teme**4/qmd
+        #Radiative temperature
+            #ter    = (qm/(aa*cc))**(0.25)
+            ter    = (1.5e0*tau/(4e0*aa*cc*ai3)*qm)**0.25e0
+        #Compton cooling rate
+            qc     = fac*qm*kes*sig*(ai4/ai3*(teme - ter))
+            #qc   = 0
         #Vertically integrated gas pressure
-            wg     = (ai4/ai3)*(rr/xmu)*sig*tem 
+            wg     = (ai4/ai3)*(rr/xmu)*sig*tem
         #Vertically integrated radiation pressure
-            wr     = qm*(ai4/(ai3*4.0e0*cc))*hh*rs*(tau+2.0e0/sqr3)
-        #Vertically integrated magnetic pressure
+            wr     = (qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
+ 	    #Vertically integrated magnetic pressure
             wb     = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
+            #wb     = 2e0*(p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
         #Q^-_adv
             qa     = (dotm/(r*r*kes))*((wt-wb)/sig)*xi
         #Q^+_vis
             qv     = 1.5e0*alpha*wt*omk
-        #f1=Q^+ - Q_rad - Q_adv
-            f1     = qv-qm*rs/cc-qa
+        #Q^+_dis
+            qd     = 8.0e0*np.pi*alphap*wb*omk
+        #f1=Q^+ - Q^-_rad - Q^-_Comp - Q^-_adv
+            f1     = qv+qd-qm*rs/cc-qc*rs/cc-qa
         #f2=W_tot - W_gas - W_rad - W_mag
             f2     = wt-wg-wr-wb
 
@@ -364,25 +393,35 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
         #d\tau/d\Sigma
             dtds   = dtads+0.5e0*kes
         #dQ^-/d\Sigma
-            dqds   =-qm*(1.5e0*dtds-dtads/(tauabs**2))/qmd
+            dqds   =-qm*(1.5e0*dtds-dtads/(tauabs**2e0))/qmd
         #dW_g/d\Sigma
             dwgds  = (ai4/ai3)*(rr/xmu)*tem
         #dW_r/d\Sigma
             dwrds  = (ai4/(ai3*4e0*cc))*(dqds*hh*rs*(tau+2e0/sqr3) \
                     +qm*(dhds*rs*(tau+2e0/sqr3)+hh*rs*dtds))
         #dW_b/d\Sigma
-            dwbds  = wb*(2.0e0*ze+0.5e0)/sig
+            dwbds  = ze*wb/sig
         #dQ^-_adv/d\Sigma
             dqads  =-(dotm/(r*r*kes))*((wt-wb)/sig**2)*xi-(dotm/(r*r*kes*sig))*xi*dwbds
+        #dT_r/d\Sigma
+            #dtrds  = 0.25e0*ter/qm*dqds
+            dtrds  = (ter/(4e0*tau*qm))*(qm*dtds+tau*dqds)
+        #dQ^_Comp/d\Sigma
+            dqcds  = fac*((kes*sig*dqds+kes*qm)*(ai4/ai3*teme-ter)-kes*sig*qm*dtrds)
+            #dqcds  = 0
+        #dQ^+_v/d\Sigma
+            dqvds  = 0e0
+        #dQ^+_d/d\Sigma
+            dqdds  = 8.0e0*np.pi*alphap*dwbds*omk
         #df1/d\Sigma
-            df1ds  =-dqds*rs/cc-dqads
+            df1ds  =dqvds+dqdds-dqds*rs/cc-dqcds*rs/cc-dqads
         #df2/d\Sigma
             df2ds  =-dwgds-dwrds-dwbds
         
         #d\tau/dT
-            dtdt   = -3.5e0*tauabs/tem
+            dtdt   =-3.5e0*tauabs/teme
         #dQ^-/dT
-            dqdt   = qm*(4e0/tem-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
+            dqdt   = qm*(4.e0/teme-(1.5e0*dtdt-dtdt/(tauabs**2))/qmd)
         #dQ^-_adv/dT
             dqadt  = 0e0
         #dWg/dT
@@ -391,8 +430,22 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
             dwrdt  = (ai4/(ai3*4e0*cc))*hh*rs*(dqdt*(tau+2e0/sqr3)+qm*dtdt)
         #dWb/dT
             dwbdt  = 0e0
+        #dT_r/dT
+            #dtrdt  = 0.25e0*ter/qm*dqdt
+            dtrdt  = (ter/(4e0*tau*qm))*(qm*dtdt+tau*dqdt)
+        #dT_e/dT
+            #dtedt  = min(tem-1e9,0)/(tem-1e9)
+            dtedt  = 1e0
+        #dQ^-_Comp/dT
+            dqcdt  = fac*kes*sig*(dqdt*(ai4/ai3*teme-ter)+qm*(ai4/ai3*dtedt-dtrdt))
+            #dqcdt  = 0
+        #dQ^+_v/dT
+            #dqvdt  = 1.5e0*(alpha*(dwgdt+dwrdt) + alphap*dwbdt)*omk
+            dqvdt  = 0e0
+        #dQ^+_d/dT
+            dqvdt  = 0e0
         #df1/dT
-            df1dt  =-dqdt*rs/cc-dqadt
+            df1dt  =dqvdt+dqvdt-dqdt*rs/cc-dqcdt*rs/cc
         #df2/dT
             df2dt  =-dwgdt-dwrdt-dwbdt
             
@@ -404,27 +457,33 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
             pgas   = (ai4/ai3)*(rr/xmu)*sig*tem
             prad   = (qm/(4.0e0*cc))*(ai4/ai3)*hh*rs*(tau+2.0e0/sqr3)
 
-            #print("sig",sig,"dsig",dsig,"rat",dsig/sig,"tem",tem05,"dtem",dtem,dtem/tem)
             # convergence check
             if (abs(dsig/sig) < 1.0e-10):
                 sig_rt = np.append(sig_rt, sig)
                 tem_rt = np.append(tem_rt, tem)
                 wt_rt = np.append(wt_rt, wt)
 
-                wb  = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.e0*ze)
-                bt_rt = np.append(bt_rt, wt/wb - 1e0)
-
+                wb    = (p0**2*s0**(-2.0*ze)/(8.0e0*np.pi*hh*rs))*sig**(2.0*ze)
+                bt_rt = np.append(bt_rt, wt/wb - 1.e0)
+                
                 tauabs = (6.2e20/(2.0e0*aa*cc*rs))*(ai65/(ai3*ai7))*(sig*sig/hh)*tem**(-3.5e0)
                 tau    = tauabs+0.5e0*kes*sig
                 qmd    = 1.5e0*tau+sqr3+1.0e0/tauabs
                 qm     = 4.0e0*aa*cc*ai3*tem**4/qmd*rs/cc
                 qm_rt  = np.append(qm_rt, qm)
 
+                ter    = (qm/(aa*cc))**(0.25)
+                qc     = fac*qm*kes*sig*(ai4/ai3*(tem - ter))
+                qc_rt  = np.append(qc_rt, qc)
+
                 qa     = (dotm/(r*r*kes))*((wt-wb)/sig)*xi
                 qa_rt  = np.append(qa_rt, qa)
 
                 qv     = 1.5e0*alpha*wt*omk
                 qv_rt  = np.append(qv_rt, qv)
+
+                taueff = np.sqrt(tau*tauabs)
+                taueff_rt = np.append(taueff_rt, taueff)
 
                 cnt = cnt+1
                 break
@@ -437,11 +496,13 @@ def thermal_equil_newton(dotm0, dotm1, sig0, \
     wt_rt  = np.delete(wt_rt,  0)
     bt_rt  = np.delete(bt_rt,  0)
     qm_rt  = np.delete(qm_rt,  0)
+    qc_rt  = np.delete(qc_rt,  0)
     qa_rt  = np.delete(qa_rt,  0)
     qv_rt  = np.delete(qv_rt,  0)
+    taueff_rt  = np.delete(taueff_rt,  0)
     dotm_rt = wt_rt/( (ell-ellin)*(cc*cc/kes)/(r*r*alpha) )
     
-    return dotm_rt,sig_rt,tem_rt,wt_rt,bt_rt,qm_rt,qa_rt,qv_rt
+    return dotm_rt,sig_rt,tem_rt,wt_rt,bt_rt,qm_rt,qc_rt,qa_rt,qv_rt,taueff_rt
 
 def uni_taueff(bhm=1e7, r=40e0, ellin=1.7e0, alpha=0.03, s0=10, ze=0.5, p0=1e17):
   
@@ -579,8 +640,8 @@ def pmag_eq_pgpr(bhm=1e7, r=40e0, ellin=1.7e0, alpha=0.03, s0=10, ze=0.5, p0=1e1
     num = 2000
 
     sig_rt = np.logspace(0,5,num)
-    wt_rt  = (p0*p0*cc*omk/(12e0*np.pi*rs))**(2e0/3e0)* \
-             ((sig_rt/s0)**(4e0*ze/3e0))*sig_rt**(1e0/3e0)
+    #wt_rt  = (p0*p0*cc*omk/(12e0*np.pi*rs))**(2e0/3e0)*((sig_rt/s0)**(4e0*ze/3e0))*sig_rt**(1e0/3e0)
+    wt_rt  = (2e0*p0*p0*cc*omk/(12e0*np.pi*rs))**(2e0/3e0)*((sig_rt/s0)**(4e0*ze/3e0))*sig_rt**(1e0/3e0)
     dotm_rt = wt_rt/((ell-ellin)*(cc*cc/kes)/(r*r*alpha))
 
     return dotm_rt,sig_rt,wt_rt

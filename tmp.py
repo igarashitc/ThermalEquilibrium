@@ -231,13 +231,13 @@ def plot(\
     #pmag = pgas+prad
     #-----------------------------------------------------------------#
 
-    dotm,sig,wt = pmag_eq_pgpr(bhm=bhm,r=r,ellin=ellin,alpha=alpha,s0=s0,ze=ze,p0=p0)
-    if (yax == 0):
-        plt.plot(sig,dotm,color=clr,linestyle="dashed")
-    elif (yax == 1):
-        plt.plot(sig,wt,color=clr,linestyle="dashed")
-    else:
-        print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
+    #dotm,sig,wt = pmag_eq_pgpr(bhm=bhm,r=r,ellin=ellin,alpha=alpha,s0=s0,ze=ze,p0=p0)
+    #if (yax == 0):
+    #    #plt.plot(sig,dotm,color=clr,linestyle="dashed")
+    #elif (yax == 1):
+    #    #plt.plot(sig,wt,color=clr,linestyle="dashed")
+    #else:
+    #    #print("yax=0:accretion rate, yax=1:vertically integrated pressure, yax=2:temperature")
 
     plt.loglog()
 
@@ -245,11 +245,11 @@ def plot(\
 
 def plot_fork(sig, dotm, wt, tem, bt, qm, qa, qv, yax=0, clr="k"):
     if (yax == 0):
-        plt.plot(sig,dotm,color=clr)
+        plt.plot(sig,dotm,color=clr,linestyle="dashed")
     elif (yax == 1):
         plt.plot(sig,wt,color=clr)
     elif (yax == 2):
-        plt.plot(sig,tem,color=clr)
+        plt.plot(sig,tem,color=clr,linestyle="dashed")
     elif (yax == 3):
         plt.plot(sig,bt,color=clr)
     elif (yax == 4):
@@ -283,7 +283,7 @@ def plot_fork(sig, dotm, wt, tem, bt, qm, qa, qv, yax=0, clr="k"):
 # except for the determination of the magnetic flux.
 #===================================================================#
 def thermal_equil_newton(dotm0, dotm1, sig0, \
-		bhm=1e7, r=40e0, ellin=1.7e0, xi=1e0, alpha=0.03, alphap=0.7\
+		bhm=1e7, r=40e0, ellin=1.7e0, xi=1e0, alpha=0.03,\
 		s0=10, ze=0.5, p0=1e17):
 
     #================================================================# 
